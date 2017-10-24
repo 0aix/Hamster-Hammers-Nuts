@@ -13,10 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\gl_shims">
+      <UniqueIdentifier>{2ada5089-b902-4eb6-a2ad-6845fbdf6a6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\gl_shims">
+      <UniqueIdentifier>{73712329-548c-43eb-9424-3beaf89b55b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scenes">
+      <UniqueIdentifier>{136dd813-776f-4d36-a6b9-d242f6d25104}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Graphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="gl_shims.cpp">
+      <Filter>Source Files\gl_shims</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Graphics.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TOC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GL.hpp">
+      <Filter>Header Files\gl_shims</Filter>
+    </ClInclude>
+    <ClInclude Include="gl_shims.hpp">
+      <Filter>Header Files\gl_shims</Filter>
+    </ClInclude>
+    <ClInclude Include="glcorearb.h">
+      <Filter>Header Files\gl_shims</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="info.txt" />
   </ItemGroup>
 </Project>

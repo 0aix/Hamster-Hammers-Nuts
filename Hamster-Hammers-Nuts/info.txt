@@ -1,0 +1,28 @@
+.glom
+
+- version - 4 bytes
+- number of items - 4 bytes
+- for each item
+	- type - 1 byte
+	- size - 4 bytes
+	- item of appropriate type, e.g. mesh
+- eof
+
+===============================
+
+.mesh
+
+- mesh type - 1 byte
+- data
+
+===============================
+
+.program
+
+- size of vertex shader	- 4 bytes
+- vertex shader
+- size of fragment shader - 4 bytes
+- fragment shader
+- attributes
+- uniforms
+- mesh type-

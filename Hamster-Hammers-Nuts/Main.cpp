@@ -1,18 +1,23 @@
 #include "Game.h"
+#include "Assets.h"
 #include "Graphics.h"
-#include <iostream>
 using namespace Hamster;
 
-#define NAME "Hamster Hammers Nuts"
-#define WIDTH 800
-#define HEIGHT 600
+#define ASSETS_NAME "mesh.blob"
+//#define ASSETS_NAME "assets.glom"
+#define WINDOW_NAME "Hamster Hammers Nuts"
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
 
 int main()
 {
-	if (!Graphics::Initialize(NAME, WIDTH, HEIGHT))
+	if (!Assets::LoadAssets(ASSETS_NAME))
+		return -1;
+	if (!Graphics::Initialize(WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT))
 		return -1;
 
-	while (Game::IsRunning());
+	while (Game::is_running)
+		Game::Update();
 
 	Graphics::Uninitialize();
 

@@ -1,20 +1,45 @@
 #include "Game.h"
+#include "Scene.h"
+#include <SDL.h>
 using namespace Hamster;
 
 namespace Game
 {
-	bool HandleInput()
+	Scene* scene;
+	SDL_Event event;
+	const Uint8* KEYBD_STATE = SDL_GetKeyboardState(NULL);
+	bool is_running = true;
+
+	bool Initialize()
 	{
+		scene = 0;
 		return true;
 	}
 
-	bool Update()
+	void Update()
 	{
-		return true;
+		while (SDL_PollEvent(&event) == 1)
+		{
+			if (event.type == SDL_QUIT)
+			{
+				is_running = false;
+				return;
+			}
+			if (!scene->HandleInput())
+				return;
+		}
+		
+		if (!scene->Update())
+			return;
+		
+		scene->Render();
 	}
 
-	bool IsRunning()
+	void NextScene(Scene* next)
 	{
-		return HandleInput() && Update();
+		if (!next)
+			is_running = false;
+		else
+			scene = next;
 	}
 }

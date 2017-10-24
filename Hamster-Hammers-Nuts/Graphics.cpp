@@ -67,4 +67,9 @@ namespace Graphics
 		SDL_GL_DeleteContext(context);
 		SDL_DestroyWindow(window);
 	}
+
+	void Present()
+	{
+		SDL_GL_SwapWindow(window);
+	}
 }
