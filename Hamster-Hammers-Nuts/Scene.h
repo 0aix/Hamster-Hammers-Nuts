@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Object.h"
 #include <chrono>
 
 namespace Hamster
@@ -24,5 +25,12 @@ namespace Hamster
 		std::chrono::time_point<std::chrono::steady_clock> current_time;
 		std::chrono::time_point<std::chrono::steady_clock> previous_time;
 		float elapsed;
+		// temp
+		GLint program_mvp;
+		GLint program_itmv;
+		GLint program_to_light;
+
+		Object* objects;
+		Camera camera;
 	};
 }

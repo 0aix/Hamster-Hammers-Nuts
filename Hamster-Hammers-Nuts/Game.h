@@ -12,7 +12,7 @@ namespace Hamster
 		extern bool is_running;
 
 		bool Initialize();
-		bool Update();
+		void Update();
 		void NextScene(Scene* next);
 	}
 }

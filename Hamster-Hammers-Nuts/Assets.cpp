@@ -1,21 +1,23 @@
 #include "Assets.h"
 #include <cassert>
-using namespace Hamster;
 
-namespace Assets
+namespace Hamster
 {
-	Asset* assets;
-
-	bool LoadAssets(char* name)
+	namespace Assets
 	{
+		Asset* assets;
+
+		bool LoadAssets(char* name)
+		{
 
 
-		return true;
-	}
+			return true;
+		}
 
-	void* GetAsset(unsigned int ID)
-	{
-		assert(ID >= TOC::HEADER::ASSET_COUNT);
-		return assets[ID].item;
+		void* GetAsset(unsigned int ID)
+		{
+			assert(ID >= TOC::HEADER::ASSET_COUNT);
+			return assets[ID].item;
+		}
 	}
 }

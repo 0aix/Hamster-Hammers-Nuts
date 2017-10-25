@@ -10,6 +10,6 @@ namespace Hamster
 		void Uninitialize();
 		void Present();
 
-		GLuint LoadProgram(int programID);
+		//GLuint LoadProgram(int programID);
 	}
 }

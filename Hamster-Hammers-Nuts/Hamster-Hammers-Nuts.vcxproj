@@ -79,6 +79,7 @@
     <Link>
       <AdditionalLibraryDirectories>..\..\kit-libs-win\out\zlib;..\..\kit-libs-win\out\libpng;..\..\kit-libs-win\out\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib;SDL2.lib;OpenGL32.lib;libpng.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -102,6 +103,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalLibraryDirectories>..\..\kit-libs-win\out\zlib;..\..\kit-libs-win\out\libpng;..\..\kit-libs-win\out\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>SDL2main.lib;SDL2.lib;OpenGL32.lib;libpng.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -118,17 +120,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Assets.cpp" />
+    <ClCompile Include="ExampleScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="gl_shims.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Meshes.cpp" />
+    <ClCompile Include="Object.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Assets.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="GL.hpp" />
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="gl_shims.hpp" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="Meshes.hpp" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="read_chunk.hpp" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="TOC.h" />
   </ItemGroup>
   <ItemGroup>
