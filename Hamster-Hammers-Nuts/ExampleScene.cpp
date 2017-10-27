@@ -3,11 +3,18 @@
 #include "Graphics.h"
 
 // temp
+#define GLM_ENABLE_EXPERIMENTAL
+#include <stdlib.h>
 #include <string>
 #include <iostream>
 #include <vector>
+#include <ctime>
+#include <random>
+#include <string>
 #include "Meshes.hpp"
 #include "glm/gtc/type_ptr.hpp"
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 
 namespace Hamster
 {
@@ -82,7 +89,7 @@ namespace Hamster
 
 		meshes.load("meshes.blob", attributes);
 
-
+		scene_meshes = meshes;
 
 
 		// actual
@@ -90,13 +97,46 @@ namespace Hamster
 		previous_time = current_time;
 		elapsed = 0.0f;
 		
-		// kinda actual
-		objects = new Object[1];
-		const Mesh& mesh = meshes.get("Table");
-		objects[0].start = mesh.start;
-		objects[0].count = mesh.count;
 
-		camera.set(5.0f, 1.2f, 0.5f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
+
+		// kinda actual
+		objects = std::unordered_map<std::string,Object>();
+		glm::vec3 hammer_offset = glm::vec3(-1.0f, -1.0f, -0.75f);
+
+		auto add_object = [&](std::string const &name, glm::vec3 const &position, glm::quat const &rotation, glm::vec3 const &scale) -> Object & {
+			Mesh const &mesh = meshes.get(name);
+			Object object;
+			object.transform.position = position;
+			object.transform.rotation = rotation;
+			object.transform.scale = scale;
+			object.start = mesh.start;
+			object.count = mesh.count;
+			objects[name] = object;
+			return objects[name];
+		};
+
+		auto rotateObj = [&](const std::string &name, float degrees, glm::vec3 axis) {
+			if (degrees == 0.0f) {
+				return;
+			}
+			auto quart = objects[name].transform.rotation;
+			quart = glm::rotate(quart, degrees, axis);
+			objects[name].transform.rotation = quart;
+		};
+
+		add_object("Hamster", glm::vec3(0.0f,0.0f,1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.5f));
+		rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+		add_object("Hammer", glm::vec3(0.0f, 0.0f, 1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(0.1f, 0.1f, 2.0f));
+		rotateObj("Hammer", -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+		objects["Hammer"].transform.position += hammer_offset;
+		add_object("Ground", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(40.0f,40.0f,0.0f));
+		Object* hamster = &objects["Hamster"];
+		Object* hammer = &objects["Hammer"];
+		
+		//rotateHamster("Up");
+		//rotateHamster("Left");
+		//rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+		camera.set(40.0f, 0.3f * M_PI, 1.5f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 
 	bool ExampleScene::HandleInput()
@@ -110,10 +150,61 @@ namespace Hamster
 
 	bool ExampleScene::Update()
 	{
-		current_time = std::chrono::high_resolution_clock::now();
-		elapsed += std::chrono::duration<float>(current_time - previous_time).count();
-		previous_time = current_time;
+		glm::vec3 hammer_offset = glm::vec3(-1.0f, -1.0f, -0.75f);
+		Object* hamster = &objects["Hamster"];
+		Object* hammer = &objects["Hammer"];
+		auto add_object = [&](std::string const &name, std::string const &mesh_name,
+			glm::vec3 const &position, glm::quat const &rotation, glm::vec3 const &scale) -> Object & {
+			Mesh const &mesh = scene_meshes.get(mesh_name);
+			Object object;
+			object.transform.position = position;
+			object.transform.rotation = rotation;
+			object.transform.scale = scale;
+			object.start = mesh.start;
+			object.count = mesh.count;
+			objects[name] = object;
+			return objects[name];
+		};
 
+		auto rotateObj = [&](const std::string &name, float degrees, glm::vec3 axis) {
+			if (degrees == 0.0f) {
+				return;
+			}
+			auto quart = objects[name].transform.rotation;
+			quart = glm::rotate(quart, degrees, axis);
+			objects[name].transform.rotation = quart;
+		};
+
+		auto rotateHamster = [&](std::string direction) {
+			hammer_offset = glm::vec3(-1.0f, -1.0f, -0.75f);
+			hamster->transform.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+			hammer->transform.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+			rotateObj("Hammer", -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+			float degrees;
+			if (direction == "Left") {
+				degrees = 1.5f*M_PI;
+			}
+			else if (direction == "Up") {
+				degrees = 1.0f*M_PI;
+			}
+			else if (direction == "Right") {
+				degrees = 0.5f*M_PI;
+			}
+			else if (direction == "Down") {
+				degrees = 0.0f;
+			}
+			hammer_offset = glm::rotate(hammer_offset, degrees, glm::vec3(0.0f, 0.0f, 1.0f));
+			objects["Hammer"].transform.position = hammer_offset + objects["Hamster"].transform.position;
+			rotateObj("Hammer", -degrees, glm::vec3(0.0f, 1.0f, 0.0f));
+			rotateObj("Hamster", degrees, glm::vec3(0.0f, 0.0f, 1.0f));
+		};
+
+		
+
+		current_time = std::chrono::high_resolution_clock::now();
+		elapsed = std::chrono::duration<float>(current_time - previous_time).count();
+		previous_time = current_time;
 		if (elapsed > 1.0f / 60.0f)
 			elapsed = 1.0f / 60.0f;
 
@@ -122,6 +213,87 @@ namespace Hamster
 			Game::NextScene(0);
 			return false;
 		}
+		if (Game::KEYBD_STATE[SDL_SCANCODE_W] && !Game::KEYBD_STATE[SDL_SCANCODE_S]) {
+			yv = 2.0f;
+			hv = 0.0f;
+			hd = 0;
+			direction = "Up";
+		}
+		else if (!Game::KEYBD_STATE[SDL_SCANCODE_W] && Game::KEYBD_STATE[SDL_SCANCODE_S]) {
+			yv = -2.0f;
+			hv = 0.0f;
+			hd = 0;
+			direction = "Down";
+		}
+		else {
+			yv = 0.0f;
+		}
+		if (Game::KEYBD_STATE[SDL_SCANCODE_A] && !Game::KEYBD_STATE[SDL_SCANCODE_D]) {
+			xv = -2.0f;
+			hv = 0.0f;
+			hd = 0;
+			direction = "Left";
+		}
+		else if (Game::KEYBD_STATE[SDL_SCANCODE_D] && !Game::KEYBD_STATE[SDL_SCANCODE_A]) {
+			xv = 2.0f;
+			hv = 0.0f;
+			hd = 0;
+			direction = "Right";
+		}
+		else {
+			xv = 0.0f;
+		}
+		if (Game::KEYBD_STATE[SDL_SCANCODE_SPACE]) {
+			hd = 0;
+			hv = 20.0f*M_PI;
+		}
+		if (hv != 0.0f) {
+			hd += elapsed*hv;
+			if (hd >= 90.0f) {
+				hd = 90.0f;
+				hv = -20.0*M_PI;
+			}
+			if (hd <= 0.0f) {
+				hd = 0.0f;
+				hv = 0.0f;
+			}
+		}
+		rotateHamster(direction);
+		rotateObj("Hammer", -hd/180.0*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+
+		hamster->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
+		hammer->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
+		next_drop -= elapsed;
+		if (next_drop <= 0.0f) {
+			next_drop = 5.0f;
+			std::mt19937 mt_rand((unsigned int)time(NULL));
+			int drop_type = mt_rand() % 2;
+			if (drop_type == 0) {
+				std::string name = "Nut" + std::to_string(nut_count);
+				add_object(name,"Nut",glm::vec3((float)(mt_rand()%15)-15.0f, (float)(mt_rand() % 15) - 15.0f, 20.0f),
+					glm::quat(1.0f,0.0f,0.0f,0.0f),glm::vec3(0.4f,0.4f,0.5f));
+				nut_count++;
+			}
+			else {
+				std::string name = "Log" + std::to_string(log_count);
+				add_object(name, "Log", glm::vec3((float)(mt_rand() % 15) - 15.0f, (float)(mt_rand() % 15) - 15.0f, 20.0f),
+					glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0, 3.0f));
+				rotateObj(name, 0.5*M_PI, glm::vec3(0.0f, 1.0f, 0.0f));
+				log_count++;
+			}
+		}
+		for (auto kv : objects) {
+			if (kv.first != "Hamster" && kv.first != "Hammer" && kv.first != "Ground") {
+				objects[kv.first].transform.position.z -= 5.0f*elapsed;
+				if (objects[kv.first].transform.position.z <= 0.5f && kv.first.substr(0,3)=="Nut") {
+					objects[kv.first].transform.position.z = 0.5f;
+				}
+				if (objects[kv.first].transform.position.z <= 1.0f && kv.first.substr(0, 3) == "Log") {
+					objects[kv.first].transform.position.z = 1.0f;
+				}
+			}
+		}
+		camera.set(40.0f, 0.0f * M_PI, 1.5f * M_PI, hamster->transform.position);
 		return true;
 	}
 
@@ -139,9 +311,10 @@ namespace Hamster
 
 		glUniform3fv(program_to_light, 1, glm::value_ptr(glm::normalize(light_in_camera)));
 
-		for (int i = 0; i < 1; i++)
+		for (auto kv : objects)
 		{
-			glm::mat4 local_to_world = objects[i].transform.make_local_to_world();
+			Object* object = &(kv.second);
+			glm::mat4 local_to_world = object->transform.make_local_to_world();
 
 			//compute modelview+projection (object space to clip space) matrix for this object:
 			glm::mat4 mvp = world_to_clip * local_to_world;
@@ -157,7 +330,7 @@ namespace Hamster
 			glUniformMatrix3fv(program_itmv, 1, GL_FALSE, glm::value_ptr(itmv));
 
 			//draw the object:
-			glDrawArrays(GL_TRIANGLES, objects[i].start, objects[i].count);
+			glDrawArrays(GL_TRIANGLES, object->start, object->count);
 		}
 
 		Graphics::Present();

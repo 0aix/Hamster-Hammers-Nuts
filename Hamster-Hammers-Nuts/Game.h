@@ -2,6 +2,7 @@
 
 #include "Scene.h"
 #include <SDL.h>
+#include "Meshes.hpp"
 
 namespace Hamster
 {
