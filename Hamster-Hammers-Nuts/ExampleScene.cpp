@@ -10,6 +10,7 @@
 #include <vector>
 #include <ctime>
 #include <random>
+#include <algorithm>
 #include <string>
 #include "Meshes.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -214,13 +215,13 @@ namespace Hamster
 			return false;
 		}
 		if (Game::KEYBD_STATE[SDL_SCANCODE_W] && !Game::KEYBD_STATE[SDL_SCANCODE_S]) {
-			yv = 2.0f;
+			yv = 5.0f;
 			hv = 0.0f;
 			hd = 0;
 			direction = "Up";
 		}
 		else if (!Game::KEYBD_STATE[SDL_SCANCODE_W] && Game::KEYBD_STATE[SDL_SCANCODE_S]) {
-			yv = -2.0f;
+			yv = -5.0f;
 			hv = 0.0f;
 			hd = 0;
 			direction = "Down";
@@ -229,13 +230,13 @@ namespace Hamster
 			yv = 0.0f;
 		}
 		if (Game::KEYBD_STATE[SDL_SCANCODE_A] && !Game::KEYBD_STATE[SDL_SCANCODE_D]) {
-			xv = -2.0f;
+			xv = -5.0f;
 			hv = 0.0f;
 			hd = 0;
 			direction = "Left";
 		}
-		else if (Game::KEYBD_STATE[SDL_SCANCODE_D] && !Game::KEYBD_STATE[SDL_SCANCODE_A]) {
-			xv = 2.0f;
+		else if (!Game::KEYBD_STATE[SDL_SCANCODE_A] && Game::KEYBD_STATE[SDL_SCANCODE_D]) {
+			xv = 5.0f;
 			hv = 0.0f;
 			hd = 0;
 			direction = "Right";
@@ -256,30 +257,107 @@ namespace Hamster
 			if (hd <= 0.0f) {
 				hd = 0.0f;
 				hv = 0.0f;
+				for (auto kv : objects) {
+					if (kv.first.substr(0, 3) == "Nut") {
+						auto nut_pos = objects[kv.first].transform.position;
+						auto ham_pos = objects["Hammer"].transform.position;
+						if (direction == "Up" && abs(ham_pos.x-nut_pos.x) <= 0.75f && abs(ham_pos.y+1-nut_pos.y)<=0.75f) {
+							objects.erase(objects.find(kv.first));
+							break;
+						}
+						if (direction == "Down" && abs(ham_pos.x - nut_pos.x) <= 0.75f && abs(ham_pos.y - 1 - nut_pos.y) <= 0.75f) {
+							objects.erase(objects.find(kv.first));
+							break;
+						}
+						if (direction == "Left" && abs(ham_pos.x - nut_pos.x - 1) <= 0.75f && abs(ham_pos.y - nut_pos.y) <= 0.75f) {
+							objects.erase(objects.find(kv.first));
+							break;
+						}
+						if (direction == "Right" && abs(ham_pos.x - nut_pos.x + 1) <= 0.75f && abs(ham_pos.y - nut_pos.y) <= 0.75f) {
+							objects.erase(objects.find(kv.first));
+							break;
+						}
+					}
+				}
 			}
 		}
 		rotateHamster(direction);
 		rotateObj("Hammer", -hd/180.0*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
-
-		hamster->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
-		hammer->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
+		bool can_move = true;
+		for (auto kv : objects) {
+			if (kv.first.substr(0,3) == "Log" && objects[kv.first].transform.position.z == 1.0f) {
+				float x1 = hamster->transform.position.x+elapsed*xv;
+				float x2 = kv.second.transform.position.x;
+				float y1 = hamster->transform.position.y+elapsed*yv;
+				float y2 = kv.second.transform.position.y;
+				if (kv.second.transform.rotation.x <= 0.6f && kv.second.transform.rotation.x >= 0.4f) {
+					if (abs(y1 - y2) <= 5.0f && abs(x1 - x2) <= 3.0f) {
+						can_move = false;
+						break;
+					}
+				}
+				else {
+					if (abs(y1 - y2) <= 3.0f && abs(x1 - x2) <= 5.0) {
+						can_move = false;
+						break;
+					}
+				}
+			}
+			else if ((kv.first.substr(0, 3) == "Log"|| kv.first.substr(0, 3) == "Nut")&&
+				objects[kv.first].transform.position.z >= 1.5f && objects[kv.first].transform.position.z <= 2.0f) {
+				float x1 = hamster->transform.position.x;
+				float x2 = kv.second.transform.position.x;
+				float y1 = hamster->transform.position.y;
+				float y2 = kv.second.transform.position.y;
+				xv = 10.0f;
+				yv = 10.0f;
+				if (y2 - y1 > 0.0f)
+					xv = -10.0;
+				if (x2 - x1 > 0.0f)
+					yv = -10.0f;
+			}
+		}
+		if (can_move) {
+			hamster->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
+			hammer->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
+		}
 		next_drop -= elapsed;
 		if (next_drop <= 0.0f) {
 			next_drop = 5.0f;
 			std::mt19937 mt_rand((unsigned int)time(NULL));
-			int drop_type = mt_rand() % 2;
-			if (drop_type == 0) {
-				std::string name = "Nut" + std::to_string(nut_count);
-				add_object(name,"Nut",glm::vec3((float)(mt_rand()%15)-15.0f, (float)(mt_rand() % 15) - 15.0f, 20.0f),
-					glm::quat(1.0f,0.0f,0.0f,0.0f),glm::vec3(0.4f,0.4f,0.5f));
-				nut_count++;
+			int drop_type = mt_rand() % 3;
+			glm::vec3 pos = glm::vec3((float)(mt_rand() % 40) - 20.0f, (float)(mt_rand() % 40) - 20.0f, 20.0f);
+			bool can_drop = true;
+			for (auto kv : objects) {
+				if (kv.first.substr(0,3)=="Log") {
+					if (abs(pos.x - kv.second.transform.position.x) <= 3.0f || abs(pos.y - kv.second.transform.position.y)<=3.0f) {
+						can_drop = false;
+						break;
+					}
+				}
+				else if (kv.first.substr(0, 3) == "Nut") {
+					if (abs(pos.x - kv.second.transform.position.x) <= 1.0f || abs(pos.y - kv.second.transform.position.y) <= 1.0f) {
+						can_drop = false;
+						break;
+					}
+				}
 			}
-			else {
-				std::string name = "Log" + std::to_string(log_count);
-				add_object(name, "Log", glm::vec3((float)(mt_rand() % 15) - 15.0f, (float)(mt_rand() % 15) - 15.0f, 20.0f),
-					glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0, 3.0f));
-				rotateObj(name, 0.5*M_PI, glm::vec3(0.0f, 1.0f, 0.0f));
-				log_count++;
+			if (can_drop) {
+				if (drop_type != 0) {
+					std::string name = "Nut" + std::to_string(nut_count);
+					add_object(name, "Nut", pos,
+						glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(0.4f, 0.4f, 0.5f));
+					nut_count++;
+				}
+				else {
+					std::string name = "Log" + std::to_string(log_count);
+					add_object(name, "Log", pos,
+						glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0, 3.0f));
+					rotateObj(name, 0.5*M_PI, glm::vec3(0.0f, 1.0f, 0.0f));
+					int rotation = mt_rand() % 4;
+					rotateObj(name, (float)rotation*0.5*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+					log_count++;
+				}
 			}
 		}
 		for (auto kv : objects) {
@@ -293,7 +371,7 @@ namespace Hamster
 				}
 			}
 		}
-		camera.set(40.0f, 0.0f * M_PI, 1.5f * M_PI, hamster->transform.position);
+		camera.set(40.0f, 0.3f * M_PI, 1.5f * M_PI, hamster->transform.position);
 		return true;
 	}
 
