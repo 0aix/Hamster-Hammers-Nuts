@@ -2,6 +2,8 @@
 
 #include "Object.h"
 #include <chrono>
+#include <unordered_map>
+#include "Meshes.hpp"
 
 namespace Hamster
 {
@@ -11,6 +13,17 @@ namespace Hamster
 		virtual bool HandleInput() = 0;
 		virtual bool Update() = 0;
 		virtual void Render() = 0;
+		Meshes scene_meshes;
+		int goal;
+		int score;
+		float xv;
+		float yv;
+		float hv;
+		float hd;
+		float next_drop = 5.0f;
+		int nut_count = 0;
+		int log_count = 0;
+		std::string direction = "Down";
 	};
 
 	class ExampleScene : public Scene
@@ -30,7 +43,7 @@ namespace Hamster
 		GLint program_itmv;
 		GLint program_to_light;
 
-		Object* objects;
+		std::unordered_map<std::string, Object> objects;
 		Camera camera;
 	};
 }

@@ -12,7 +12,8 @@ to_write = [
 	'Hammer',
 	'Hamster',
 	'Log',
-	'Nut'
+	'Nut',
+	'Ground'
 ]
 
 #data contains vertex and normal data from the meshes:
