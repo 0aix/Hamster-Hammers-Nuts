@@ -23,7 +23,7 @@ namespace Hamster
 	static GLuint compile_shader(GLenum type, std::string const &source);
 	static GLuint link_program(GLuint fragment_shader, GLuint vertex_shader);
 
-	ExampleScene::ExampleScene()
+	StoryScene::StoryScene()
 	{
 		GLuint program = 0;
 		GLint program_Position = 0;
@@ -102,7 +102,7 @@ namespace Hamster
 
 		// kinda actual
 		objects = std::unordered_map<std::string,Object>();
-		glm::vec3 hammer_offset = glm::vec3(-1.0f, -1.0f, -0.75f);
+		glm::vec3 hammer_offset = glm::vec3(-1.0f, 1.0f, 1.0f);
 
 		auto add_object = [&](std::string const &name, glm::vec3 const &position, glm::quat const &rotation, glm::vec3 const &scale) -> Object & {
 			Mesh const &mesh = meshes.get(name);
@@ -125,12 +125,12 @@ namespace Hamster
 			objects[name].transform.rotation = quart;
 		};
 
-		add_object("Hamster", glm::vec3(0.0f,0.0f,1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.5f));
-		rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
-		add_object("Hammer", glm::vec3(0.0f, 0.0f, 1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(0.1f, 0.1f, 2.0f));
-		rotateObj("Hammer", -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+		add_object("Hamster", glm::vec3(0.0f,0.0f,1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.0f));
+		//rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+		add_object("Hammer", glm::vec3(0.0f, 0.0f, 1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//rotateObj("Hammer", -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
 		objects["Hammer"].transform.position += hammer_offset;
-		add_object("Ground", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(40.0f,40.0f,0.0f));
+		add_object("Ground", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.0f));
 		Object* hamster = &objects["Hamster"];
 		Object* hammer = &objects["Hammer"];
 		
@@ -140,7 +140,7 @@ namespace Hamster
 		camera.set(40.0f, 0.3f * M_PI, 1.5f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 
-	bool ExampleScene::HandleInput()
+	bool StoryScene::HandleInput()
 	{
 		if (Game::event.type == SDL_MOUSEMOTION)
 		{
@@ -149,7 +149,7 @@ namespace Hamster
 		return true;
 	}
 
-	bool ExampleScene::Update()
+	bool StoryScene::Update()
 	{
 		glm::vec3 hammer_offset = glm::vec3(-1.0f, -1.0f, -0.75f);
 		Object* hamster = &objects["Hamster"];
@@ -375,7 +375,7 @@ namespace Hamster
 		return true;
 	}
 
-	void ExampleScene::Render()
+	void StoryScene::Render()
 	{
 		glClearColor(0.5, 0.5, 0.5, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

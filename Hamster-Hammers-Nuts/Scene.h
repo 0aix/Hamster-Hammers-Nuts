@@ -14,7 +14,7 @@ namespace Hamster
 		virtual bool Update() = 0;
 		virtual void Render() = 0;
 		Meshes scene_meshes;
-		int goal;
+		int max;
 		int score;
 		float xv;
 		float yv;
@@ -26,10 +26,10 @@ namespace Hamster
 		std::string direction = "Down";
 	};
 
-	class ExampleScene : public Scene
+	class StoryScene : public Scene
 	{
 	public:
-		ExampleScene();
+		StoryScene();
 		bool HandleInput();
 		bool Update();
 		void Render();

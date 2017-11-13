@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#blender --background --python export-meshes.py
 
 import sys
 
@@ -13,7 +14,10 @@ to_write = [
 	'Hamster',
 	'Log',
 	'Nut',
-	'Ground'
+	'Ground',
+	'Wall',
+	'Ladder',
+	'Hawk'
 ]
 
 #data contains vertex and normal data from the meshes:
