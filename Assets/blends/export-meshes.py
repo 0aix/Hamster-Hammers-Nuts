@@ -16,7 +16,6 @@ to_write = [
 	'Nut',
 	'Ground',
 	'Wall',
-	'Ladder',
 	'Hawk'
 ]
 

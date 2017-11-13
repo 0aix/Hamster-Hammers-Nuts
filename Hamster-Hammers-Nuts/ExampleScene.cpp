@@ -102,10 +102,10 @@ namespace Hamster
 
 		// kinda actual
 		objects = std::unordered_map<std::string,Object>();
-		glm::vec3 hammer_offset = glm::vec3(-1.0f, 1.0f, 1.0f);
-
-		auto add_object = [&](std::string const &name, glm::vec3 const &position, glm::quat const &rotation, glm::vec3 const &scale) -> Object & {
-			Mesh const &mesh = meshes.get(name);
+		
+		auto add_object = [&](std::string const &name, std::string const &mesh_name,
+			glm::vec3 const &position, glm::quat const &rotation, glm::vec3 const &scale) -> Object & {
+			Mesh const &mesh = scene_meshes.get(mesh_name);
 			Object object;
 			object.transform.position = position;
 			object.transform.rotation = rotation;
@@ -124,20 +124,28 @@ namespace Hamster
 			quart = glm::rotate(quart, degrees, axis);
 			objects[name].transform.rotation = quart;
 		};
-
-		add_object("Hamster", glm::vec3(0.0f,0.0f,1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.0f));
+		center = glm::vec3(0.0f);
+		score = 0;
+		add_object("Hamster", "Hamster", glm::vec3(0.0f,0.0f,1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.0f));
+		direction = "Down";
 		//rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
-		add_object("Hammer", glm::vec3(0.0f, 0.0f, 1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-		//rotateObj("Hammer", -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+		add_object("Hammer", "Hammer", glm::vec3(0.0f, 0.0f, 1.5f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		//rotateObj("Hammer", -0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 		objects["Hammer"].transform.position += hammer_offset;
-		add_object("Ground", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.0f));
+		add_object("Ground" + std::to_string(ground_count), "Ground", glm::vec3(0.0f, 0.0f, 0.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f,1.0f,1.0f));
+		ground_count++;
+		//rotateObj("Ground", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+		add_object("Wall" + std::to_string(wall_count), "Wall", glm::vec3(30.0f, 0.0f, 20.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		wall_count++;
+		add_object("Wall" + std::to_string(wall_count), "Wall", glm::vec3(-30.0f, 0.0f, -20.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+		wall_count++;
 		Object* hamster = &objects["Hamster"];
 		Object* hammer = &objects["Hammer"];
 		
 		//rotateHamster("Up");
 		//rotateHamster("Left");
 		//rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
-		camera.set(40.0f, 0.3f * M_PI, 1.5f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
+		camera.set(60.0f, 0.2f * M_PI, 1.0f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
 	}
 
 	bool StoryScene::HandleInput()
@@ -146,12 +154,17 @@ namespace Hamster
 		{
 			
 		}
+		if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_SPACE && stun == 0.0f && !on_ladder)
+		{
+			hd = 0;
+			hv = 20.0f*M_PI;
+		}
 		return true;
 	}
 
 	bool StoryScene::Update()
 	{
-		glm::vec3 hammer_offset = glm::vec3(-1.0f, -1.0f, -0.75f);
+		std::mt19937 mt_rand((unsigned int)time(NULL));
 		Object* hamster = &objects["Hamster"];
 		Object* hammer = &objects["Hammer"];
 		auto add_object = [&](std::string const &name, std::string const &mesh_name,
@@ -175,29 +188,45 @@ namespace Hamster
 			quart = glm::rotate(quart, degrees, axis);
 			objects[name].transform.rotation = quart;
 		};
-
+		auto clearAll = [&]() {
+			auto kv = objects.begin();
+			while (kv != objects.end()) {
+				if (kv->first.substr(0, 3) == "Nut" || kv->first.substr(0, 3) == "Log") {
+					kv = objects.erase(kv);
+				}
+				else {
+					kv++;
+				}
+			}
+		};
 		auto rotateHamster = [&](std::string direction) {
-			hammer_offset = glm::vec3(-1.0f, -1.0f, -0.75f);
 			hamster->transform.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-			rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
+			//rotateObj("Hamster", 0.5f*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 			hammer->transform.rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
-			rotateObj("Hammer", -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+			//rotateObj("Hammer", -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
 			float degrees;
 			if (direction == "Left") {
+				hammer_offset = glm::vec3(-1.0f, 1.0f, 0.5f);
 				degrees = 1.5f*M_PI;
+				rotateObj("Hammer", hd/180.0*M_PI, glm::vec3(-1.0f, 0.0f, 0.0f));
 			}
 			else if (direction == "Up") {
+				hammer_offset = glm::vec3(1.0f, 1.0f, 0.5f);
 				degrees = 1.0f*M_PI;
+				rotateObj("Hammer", hd / 180.0*M_PI, glm::vec3(0.0f, 1.0f, 0.0f));
 			}
 			else if (direction == "Right") {
+				hammer_offset = glm::vec3(1.0f, -1.0f, 0.5f);
 				degrees = 0.5f*M_PI;
+				rotateObj("Hammer", hd / 180.0*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
 			}
 			else if (direction == "Down") {
+				hammer_offset = glm::vec3(-1.0f, -1.0f, 0.5f);
 				degrees = 0.0f;
+				rotateObj("Hammer", hd / 180.0*M_PI, glm::vec3(0.0f, -1.0f, 0.0f));
 			}
-			hammer_offset = glm::rotate(hammer_offset, degrees, glm::vec3(0.0f, 0.0f, 1.0f));
 			objects["Hammer"].transform.position = hammer_offset + objects["Hamster"].transform.position;
-			rotateObj("Hammer", -degrees, glm::vec3(0.0f, 1.0f, 0.0f));
+			rotateObj("Hammer", degrees, glm::vec3(0.0f, 0.0f, 1.0f));
 			rotateObj("Hamster", degrees, glm::vec3(0.0f, 0.0f, 1.0f));
 		};
 
@@ -214,119 +243,265 @@ namespace Hamster
 			Game::NextScene(0);
 			return false;
 		}
-		if (Game::KEYBD_STATE[SDL_SCANCODE_W] && !Game::KEYBD_STATE[SDL_SCANCODE_S]) {
-			yv = 5.0f;
-			hv = 0.0f;
-			hd = 0;
-			direction = "Up";
+		//Move
+		if (stun == 0.0f && !on_ladder) {
+			if (Game::KEYBD_STATE[SDL_SCANCODE_A] && !Game::KEYBD_STATE[SDL_SCANCODE_D] && stun == 0.0f) {
+				yv = 5.0f;
+				hv = 0.0f;
+				hd = 0;
+				direction = "Left";
+			}
+			else if (!Game::KEYBD_STATE[SDL_SCANCODE_A] && Game::KEYBD_STATE[SDL_SCANCODE_D] && stun == 0.0f) {
+				yv = -5.0f;
+				hv = 0.0f;
+				hd = 0;
+				direction = "Right";
+			}
+			else {
+				yv = 0.0f;
+			}
+			if (Game::KEYBD_STATE[SDL_SCANCODE_W] && !Game::KEYBD_STATE[SDL_SCANCODE_S] && stun == 0.0f) {
+				xv = 5.0f;
+				hv = 0.0f;
+				hd = 0;
+				direction = "Up";
+			}
+			else if (!Game::KEYBD_STATE[SDL_SCANCODE_W] && Game::KEYBD_STATE[SDL_SCANCODE_S] && stun == 0.0f) {
+				xv = -5.0f;
+				hv = 0.0f;
+				hd = 0;
+				direction = "Down";
+			}
+			else {
+				xv = 0.0f;
+			}
 		}
-		else if (!Game::KEYBD_STATE[SDL_SCANCODE_W] && Game::KEYBD_STATE[SDL_SCANCODE_S]) {
-			yv = -5.0f;
-			hv = 0.0f;
-			hd = 0;
-			direction = "Down";
-		}
-		else {
-			yv = 0.0f;
-		}
-		if (Game::KEYBD_STATE[SDL_SCANCODE_A] && !Game::KEYBD_STATE[SDL_SCANCODE_D]) {
-			xv = -5.0f;
-			hv = 0.0f;
-			hd = 0;
-			direction = "Left";
-		}
-		else if (!Game::KEYBD_STATE[SDL_SCANCODE_A] && Game::KEYBD_STATE[SDL_SCANCODE_D]) {
-			xv = 5.0f;
-			hv = 0.0f;
-			hd = 0;
-			direction = "Right";
-		}
-		else {
-			xv = 0.0f;
-		}
-		if (Game::KEYBD_STATE[SDL_SCANCODE_SPACE]) {
-			hd = 0;
-			hv = 20.0f*M_PI;
-		}
+		//Hammering
 		if (hv != 0.0f) {
 			hd += elapsed*hv;
-			if (hd >= 90.0f) {
-				hd = 90.0f;
-				hv = -20.0*M_PI;
-			}
-			if (hd <= 0.0f) {
-				hd = 0.0f;
-				hv = 0.0f;
+			if (hd >= 120.0f) {	
 				for (auto kv : objects) {
 					if (kv.first.substr(0, 3) == "Nut") {
 						auto nut_pos = objects[kv.first].transform.position;
 						auto ham_pos = objects["Hammer"].transform.position;
-						if (direction == "Up" && abs(ham_pos.x-nut_pos.x) <= 0.75f && abs(ham_pos.y+1-nut_pos.y)<=0.75f) {
+						if (direction == "Up" && abs(ham_pos.x-nut_pos.x + 2.0f) <= 1.0f && abs(ham_pos.y - nut_pos.y)<= 1.0f) {
 							objects.erase(objects.find(kv.first));
+							if (score < max)
+								score++;
 							break;
 						}
-						if (direction == "Down" && abs(ham_pos.x - nut_pos.x) <= 0.75f && abs(ham_pos.y - 1 - nut_pos.y) <= 0.75f) {
+						if (direction == "Down" && abs(ham_pos.x - nut_pos.x - 2.0f) <= 1.0f && abs(ham_pos.y - nut_pos.y) <= 1.0f) {
 							objects.erase(objects.find(kv.first));
+							if (score < max)
+								score++;
 							break;
 						}
-						if (direction == "Left" && abs(ham_pos.x - nut_pos.x - 1) <= 0.75f && abs(ham_pos.y - nut_pos.y) <= 0.75f) {
+						if (direction == "Left" && abs(ham_pos.x - nut_pos.x) <= 1.0f && abs(ham_pos.y - nut_pos.y + 2.0f) <= 1.0f) {
 							objects.erase(objects.find(kv.first));
+							if (score < max)
+								score++;
 							break;
 						}
-						if (direction == "Right" && abs(ham_pos.x - nut_pos.x + 1) <= 0.75f && abs(ham_pos.y - nut_pos.y) <= 0.75f) {
+						if (direction == "Right" && abs(ham_pos.x - nut_pos.x) <= 1.0f && abs(ham_pos.y - nut_pos.y - 2.0f) <= 1.0f) {
 							objects.erase(objects.find(kv.first));
+							if (score < max)
+								score++;
 							break;
 						}
 					}
 				}
+				hd = 0.0f;
+				hv = 0.0f;
 			}
 		}
 		rotateHamster(direction);
-		rotateObj("Hammer", -hd/180.0*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
-		bool can_move = true;
+		if (stun != 0.0f) {
+			stun -= elapsed;
+			if (stun < 0.0f)
+				stun = 0.0f;
+		}
 		for (auto kv : objects) {
 			if (kv.first.substr(0,3) == "Log" && objects[kv.first].transform.position.z == 1.0f) {
 				float x1 = hamster->transform.position.x+elapsed*xv;
 				float x2 = kv.second.transform.position.x;
 				float y1 = hamster->transform.position.y+elapsed*yv;
 				float y2 = kv.second.transform.position.y;
-				if (kv.second.transform.rotation.x <= 0.6f && kv.second.transform.rotation.x >= 0.4f) {
-					if (abs(y1 - y2) <= 5.0f && abs(x1 - x2) <= 3.0f) {
-						can_move = false;
+				if (kv.second.transform.rotation.z <= 0.9f && kv.second.transform.rotation.z >= 0.4f) {
+					if (abs(y1 - y2) <= 4.0f && abs(x1 - x2) <= 2.0f) {
+						if (windv > 0.0f && hamster->transform.position.y-y2>0.0f) {
+							yv = windv;
+						}
+						else if (windv < 0.0f && hamster->transform.position.y - y2<0.0f) {
+							yv = windv;
+						}
+						else {
+							xv = 0.0f;
+							yv = 0.0f;
+						}
 						break;
 					}
 				}
 				else {
-					if (abs(y1 - y2) <= 3.0f && abs(x1 - x2) <= 5.0) {
-						can_move = false;
+					if (abs(y1 - y2) <= 2.0f && abs(x1 - x2) <= 4.0f) {
+						if (windv > 0.0f && hamster->transform.position.y - y2>0.0f) {
+							yv = windv;
+						}
+						else if (windv < 0.0f && hamster->transform.position.y - y2<0.0f) {
+							yv = windv;
+						}
+						else {
+							xv = 0.0f;
+							yv = 0.0f;
+						}
 						break;
 					}
 				}
 			}
-			else if ((kv.first.substr(0, 3) == "Log"|| kv.first.substr(0, 3) == "Nut")&&
-				objects[kv.first].transform.position.z >= 1.5f && objects[kv.first].transform.position.z <= 2.0f) {
-				float x1 = hamster->transform.position.x;
+			else if (kv.first.substr(0, 3) == "Log" && objects[kv.first].transform.position.z > 1.0f && objects[kv.first].transform.position.z <= 2.0f) {
+				float x1 = hamster->transform.position.x + elapsed*xv;
 				float x2 = kv.second.transform.position.x;
-				float y1 = hamster->transform.position.y;
+				float y1 = hamster->transform.position.y + elapsed*yv;
 				float y2 = kv.second.transform.position.y;
-				xv = 10.0f;
-				yv = 10.0f;
-				if (y2 - y1 > 0.0f)
-					xv = -10.0;
-				if (x2 - x1 > 0.0f)
-					yv = -10.0f;
+				if (kv.second.transform.rotation.z <= 0.9f && kv.second.transform.rotation.z >= 0.4f) {
+					if (abs(y1 - y2) <= 4.0f && abs(x1 - x2) <= 2.0f) {
+						stun = 1.0f;
+						xv = 5.0f;
+						yv = 5.0f;
+						if (y2 - y1 > 0.0f)
+							yv = -5.0;
+						if (x2 - x1 > 0.0f)
+							xv = -5.0f;
+						if (score > 0)
+							score--;
+						break;
+					}
+				}
+				else {
+					if (abs(y1 - y2) <= 2.0f && abs(x1 - x2) <= 4.0f) {
+						stun = 1.0f;
+						xv = 5.0f;
+						yv = 5.0f;
+						if (y2 - y1 > 0.0f)
+							yv = -5.0;
+						if (x2 - x1 > 0.0f)
+							xv = -5.0f;
+						if (score > 0)
+							score--;
+						break;
+					}
+				}
+			}
+			else if (kv.first.substr(0, 3) == "Nut" &&
+				objects[kv.first].transform.position.z >= 1.0f && objects[kv.first].transform.position.z <= 2.0f) {
+				float x1 = hamster->transform.position.x + elapsed*xv;
+				float x2 = kv.second.transform.position.x;
+				float y1 = hamster->transform.position.y + elapsed*yv;
+				float y2 = kv.second.transform.position.y;
+				if (abs(y1 - y2) <= 1.0f && abs(x1 - x2) <= 1.0f) {
+					stun = 1.0f;
+					xv = 5.0f;
+					yv = 5.0f;
+					if (y2 - y1 > 0.0f)
+						yv = -5.0;
+					if (x2 - x1 > 0.0f)
+						xv = -5.0f;
+					if (score > 0)
+						score--;
+					break;
+				}
 			}
 		}
-		if (can_move) {
-			hamster->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
-			hammer->transform.position += glm::vec3(xv*elapsed, yv*elapsed, 0.0f);
+		hawk_time -= elapsed;
+		if (!has_hawk && hawk_time == 0.0f) {
+			if (mt_rand() % 20 == 0) {
+				has_hawk = true;
+			}
+			if (mt_rand() % 2 == 0) {
+				add_object("Hawk", "Hawk", glm::vec3((float)(mt_rand() % 60) - 30.0f, -30.0f, 2.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f));
+				hyv = 10.0f;
+			}
+			else {
+				add_object("Hawk", "Hawk", glm::vec3((float)(mt_rand() % 60) - 30.0f, 30.0f, 2.0f), glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f));
+				hyv = -10.0f;
+			}
 		}
+		if (has_hawk) {
+			objects["Hawk"].transform.position += glm::vec3(hxv, hyv, hzv);
+			if (objects["Hawk"].transform.position.y > 50.0f) {
+				objects.erase(objects.find("Hawk"));
+				hawk_time = 30.0f;
+				has_hawk = false;
+			}
+			if (abs(objects["Hawk"].transform.position.x - hamster->transform.position.x) < 2.0f && abs(objects["Hawk"].transform.position.y - hamster->transform.position.y) < 2.0f) {
+				score = 0;
+				xv = hxv;
+				yv = hyv;
+			}
+		}
+		if (hamster->transform.position.x + xv*elapsed < -31.0f) {
+			on_ladder = true;
+			fell = true;
+			score = std::max(0, score - 5);
+			xv = 0.0f;
+			yv = 0.0f;
+			zv = -5.0f;
+		}
+		if (hamster->transform.position.x + xv*elapsed > 29.0f) {
+			if (score >= max && abs(hamster->transform.position.y) <= 2.0f && direction == "Up") {
+				on_ladder = true;
+				score = 0;
+				xv = 0.0f;
+				yv = 0.0f;
+				zv = 5.0f;
+			} else
+				xv = 0.0f;
+			
+		}
+		if (hamster->transform.position.y + yv*elapsed > 31.0f || hamster->transform.position.y + yv*elapsed < -31.0f) {
+			on_ladder = true;
+			fell = true;
+			score = std::max(0, score - 5);
+			xv = 0.0f;
+			yv = 0.0f;
+			zv = -5.0f;
+		}
+		hamster->transform.position += glm::vec3(xv*elapsed, yv*elapsed, zv*elapsed);
+		hammer->transform.position += glm::vec3(xv*elapsed, yv*elapsed, zv*elapsed);
+		if (hamster->transform.position.z <1.5f && hamster->transform.position.z > 0.0f) {
+			if (!fell) {
+				on_ladder = false;
+				if(zv > 0.0f)
+					hamster->transform.position += glm::vec3(2.0f, 0.0f, 0.0f);
+				hamster->transform.position.z = 1.5f;
+				hammer->transform.position = hamster->transform.position + hammer_offset;
+				zv = 0.0f;
+			}
+		}
+		if (hamster->transform.position.z < -10.0f) {
+			clearAll();
+			if (fell)
+				fell = false;
+			if (abs(hamster->transform.position.y) > 30.0) {
+				direction = "Down";
+				hamster->transform.position = glm::vec3(29.0, hamster->transform.position.x, 30.0f);
+				hammer->transform.position = hamster->transform.position + hammer_offset;
+			}
+			else {
+				hamster->transform.position = glm::vec3(29.0, hamster->transform.position.y, 30.0f);
+				hammer->transform.position = hamster->transform.position + hammer_offset;
+			}
+		}
+		if (hamster->transform.position.z > 30.0f) {
+			clearAll();
+			hamster->transform.position = glm::vec3(-31.0, hamster->transform.position.y, -10.0f);
+			hammer->transform.position = hamster->transform.position + hammer_offset;
+		}
+		//object drops
 		next_drop -= elapsed;
 		if (next_drop <= 0.0f) {
-			next_drop = 5.0f;
-			std::mt19937 mt_rand((unsigned int)time(NULL));
+			next_drop = 1.0f;
 			int drop_type = mt_rand() % 3;
-			glm::vec3 pos = glm::vec3((float)(mt_rand() % 40) - 20.0f, (float)(mt_rand() % 40) - 20.0f, 20.0f);
+			glm::vec3 pos = glm::vec3((float)(mt_rand() % 54) - 27.0f, (float)(mt_rand() % 54) - 27.0f, 30.0f);
 			bool can_drop = true;
 			for (auto kv : objects) {
 				if (kv.first.substr(0,3)=="Log") {
@@ -346,32 +521,53 @@ namespace Hamster
 				if (drop_type != 0) {
 					std::string name = "Nut" + std::to_string(nut_count);
 					add_object(name, "Nut", pos,
-						glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(0.4f, 0.4f, 0.5f));
+						glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f));
 					nut_count++;
 				}
 				else {
 					std::string name = "Log" + std::to_string(log_count);
 					add_object(name, "Log", pos,
-						glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f, 1.0, 3.0f));
-					rotateObj(name, 0.5*M_PI, glm::vec3(0.0f, 1.0f, 0.0f));
+						glm::quat(1.0f, 0.0f, 0.0f, 0.0f), glm::vec3(1.0f));
 					int rotation = mt_rand() % 4;
-					rotateObj(name, (float)rotation*0.5*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+					rotateObj(name, (float)rotation*0.5*M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 					log_count++;
 				}
 			}
 		}
-		for (auto kv : objects) {
-			if (kv.first != "Hamster" && kv.first != "Hammer" && kv.first != "Ground") {
-				objects[kv.first].transform.position.z -= 5.0f*elapsed;
-				if (objects[kv.first].transform.position.z <= 0.5f && kv.first.substr(0,3)=="Nut") {
-					objects[kv.first].transform.position.z = 0.5f;
-				}
-				if (objects[kv.first].transform.position.z <= 1.0f && kv.first.substr(0, 3) == "Log") {
-					objects[kv.first].transform.position.z = 1.0f;
-				}
+		if (windt != 0.0f) {
+			windt -= elapsed;
+			if (windt < 0.0f) {
+				windt = 0.0f;
+				windv = 0.0f;
 			}
 		}
-		camera.set(40.0f, 0.3f * M_PI, 1.5f * M_PI, hamster->transform.position);
+		else {
+			int dir = mt_rand() % 3;
+			windt = 10.0f;
+			windv = dir - 1;
+		}
+		auto kv = objects.begin();
+		while (kv != objects.end()) {
+			if (kv->first.substr(0, 3) == "Nut" || kv->first.substr(0, 3) == "Log") {
+				glm::vec3 *pos = &objects[kv->first].transform.position;
+				pos->z -= 5.0f*elapsed;
+				if (pos->z <= 0.5f && kv->first.substr(0, 3) == "Nut" && abs(pos->x) <= center.x + 31.0f && abs(pos->y) <= center.y + 31.0f && pos->z > 0.0f) {
+					pos->z = 0.5f;
+				}
+				if (pos->z <= 1.0f && kv->first.substr(0, 3) == "Log" && abs(pos->x) <= center.x + 31.0f && abs(pos->y) <= center.y + 31.0f && pos->z > 0.0f) {
+					pos->z = 1.0f;
+				}
+				pos->y += windv*elapsed;
+				if (pos->z < -1.5)
+					kv = objects.erase(objects.find(kv->first));
+				else
+					kv++;
+			}
+			else {
+				kv++;
+			}
+		}
+		camera.set(60.0f, 0.2f * M_PI, 1.0f * M_PI, center);
 		return true;
 	}
 
