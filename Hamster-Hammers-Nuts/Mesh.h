@@ -10,9 +10,9 @@ namespace Hamster
 	{
 		Mesh() {}
 		Mesh(unsigned int meshID);
-		Mesh(unsigned int meshID, unsigned int sknID, unsigned int animID);
+		Mesh(unsigned int meshID, unsigned int sknID, unsigned int animID, bool repeat = true);
 
-		void Play(unsigned int animID);
+		void Play(unsigned int animID, bool repeat = true, bool cont = true);
 		void Update(float elapsed);
 
 		// Mesh
@@ -28,7 +28,10 @@ namespace Hamster
 		float frame_time;
 		std::vector<glm::mat4x3> bone_to_world;
 		std::vector<glm::mat4x3> bind_to_world;
+		unsigned int anim;
 		bool animated;
+		bool repeating;
+		bool finished;
 	};
 
 	struct Vertex

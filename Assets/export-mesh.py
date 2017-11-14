@@ -59,6 +59,8 @@ for arg in args:
 		data = b''
 		obj_name = obj.name.lower()
 
+		print(obj_name)
+
 		#check if name was used already
 		if obj_name in mesh_names:
 			input('Error:' + obj_name + ' appears in ' + mesh_names[obj_name] + ' and ' + arg)
@@ -137,20 +139,23 @@ for arg in args:
 		if armature != None:
 			armature.data.pose_position = 'REST'
 			bpy.context.scene.update()
-			mesh = obj.to_mesh(bpy.context.scene, True, 'RENDER')
-			bm = bmesh.new()
-			bm.from_mesh(mesh)
-			bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method=3, ngon_method=1)
-			bm.to_mesh(mesh)
-			bm.free()
+			#mesh = obj.to_mesh(bpy.context.scene, True, 'RENDER')
+			#bm = bmesh.new()
+			#bm.from_mesh(mesh)
+			#bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method=3, ngon_method=1)
+			#bm.to_mesh(mesh)
+			#bm.free()
+			#armature.data.pose_position = 'POSE'
+		#else:
+		#subdivide object's mesh into triangles:
+		bpy.ops.object.mode_set(mode='EDIT')
+		bpy.ops.mesh.select_all(action='SELECT')
+		bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
+		bpy.ops.object.mode_set(mode='OBJECT')
+		mesh = obj.data
+
+		if armature != None:
 			armature.data.pose_position = 'POSE'
-		else:
-			#subdivide object's mesh into triangles:
-			bpy.ops.object.mode_set(mode='EDIT')
-			bpy.ops.mesh.select_all(action='SELECT')
-			bpy.ops.mesh.quads_convert_to_tris(quad_method='BEAUTY', ngon_method='BEAUTY')
-			bpy.ops.object.mode_set(mode='OBJECT')
-			mesh = obj.data
 
 		#compute normals (respecting face smoothing):
 		#if armature == None:
@@ -169,6 +174,8 @@ for arg in args:
 			uvs = mesh.uv_layers.active.data
 
 		xf = mathutils.Matrix()
+		#decompose and apply scale but not translation?
+		#xf = obj.matrix_world.copy()
 		if armature != None:
 			obj_to_arm = armature.matrix_world.copy()
 			obj_to_arm.invert()
@@ -184,12 +191,7 @@ for arg in args:
 		outfile = open('meshes/' + obj_name + '.mesh', 'wb')
 		outfile.write(struct.pack('I', vertex_count))
 
-		print(len(mesh.polygons))
-		j = 0
 		for poly in mesh.polygons:
-			j += 1
-			if j % 1000 == 0:
-				print(j)
 			assert(len(poly.loop_indices) == 3)
 			data = b''
 			for i in range(0, 3):

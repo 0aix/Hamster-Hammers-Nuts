@@ -11,6 +11,7 @@ namespace Hamster
 		extern GLuint basic;
 		extern GLuint animated;
 		extern GLuint shadow;
+		extern GLuint shadow_animated;
 		extern GLuint FramebufferName;
 		extern GLuint depthTexture;
 

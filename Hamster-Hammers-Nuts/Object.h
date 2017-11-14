@@ -22,7 +22,6 @@ namespace Hamster
 		Transform transform;
 
 		// camera parameters (orthographic)
-		float fovy = glm::radians(60.0f); // vertical fov (in radians)
 		float aspect = 4.0f / 3.0f; // x / y
 		float near = 0.1f;
 		float far = 1000.0f;
