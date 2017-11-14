@@ -37,9 +37,10 @@ namespace Hamster
 
 	void Camera::set(float radius, float elevation, float azimuth, glm::vec3& target)
 	{
-		transform.position = radius * 
-			glm::vec3(std::cos(elevation) * std::cos(azimuth), std::cos(elevation) * std::sin(azimuth), std::sin(elevation)) + 
-			target;
+		transform.position = radius * glm::vec3(std::cos(elevation) * std::cos(azimuth), 
+												std::cos(elevation) * std::sin(azimuth),
+												std::sin(elevation)) + 
+							 target;
 
 		glm::vec3 out = -glm::normalize(target - transform.position);
 		glm::vec3 up = glm::vec3(0.0f, 0.0f, 1.0f);
@@ -52,6 +53,6 @@ namespace Hamster
 
 	glm::mat4 Camera::make_projection() const
 	{
-		return glm::infinitePerspective(fovy, aspect, near);
+		return glm::ortho(scale * -aspect, scale * aspect, -scale, scale, near, far);
 	}
 }

@@ -10,9 +10,9 @@ using namespace Hamster;
 
 int main(int argc, char** args)
 {
-	if (!Assets::LoadAssets(ASSETS_NAME))
-		return -1;
 	if (!Graphics::Initialize(WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT))
+		return -1;
+	if (!Assets::LoadAssets(ASSETS_NAME))
 		return -1;
 
 	if (Game::Initialize())

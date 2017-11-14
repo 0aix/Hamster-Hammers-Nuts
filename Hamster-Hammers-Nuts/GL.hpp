@@ -7,6 +7,7 @@
 #ifdef _WIN32
 #include "gl_shims.hpp"
 #undef near
+#undef far
 #undef min
 #undef max
 #else

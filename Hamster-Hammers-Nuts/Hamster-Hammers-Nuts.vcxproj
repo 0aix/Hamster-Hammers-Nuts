@@ -74,7 +74,8 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\kit-libs-win\out\include\SDL2;..\..\kit-libs-win\out\libpng;..\..\kit-libs-win\out\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\kit-libs-win\out\include\SDL2;..\..\kit-libs-win\out\libpng;..\..\kit-libs-win\out\include;..\Assets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\..\kit-libs-win\out\zlib;..\..\kit-libs-win\out\libpng;..\..\kit-libs-win\out\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -96,7 +97,8 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>..\..\kit-libs-win\out\include\SDL2;..\..\kit-libs-win\out\libpng;..\..\kit-libs-win\out\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\kit-libs-win\out\include\SDL2;..\..\kit-libs-win\out\libpng;..\..\kit-libs-win\out\include;..\Assets;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>GLM_ENABLE_EXPERIMENTAL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -121,13 +123,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Assets.cpp" />
-    <ClCompile Include="ExampleScene.cpp" />
+    <ClCompile Include="StoryScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="gl_shims.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Meshes.cpp" />
+    <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Assets.h" />
@@ -136,11 +139,9 @@
     <ClInclude Include="glcorearb.h" />
     <ClInclude Include="gl_shims.hpp" />
     <ClInclude Include="Graphics.h" />
-    <ClInclude Include="Meshes.hpp" />
+    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
-    <ClInclude Include="read_chunk.hpp" />
     <ClInclude Include="Scene.h" />
-    <ClInclude Include="TOC.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="info.txt" />

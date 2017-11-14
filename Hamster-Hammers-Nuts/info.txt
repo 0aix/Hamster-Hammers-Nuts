@@ -1,28 +1,104 @@
 .glom
 
-- version - 4 bytes
-- number of items - 4 bytes
-- for each item
-	- type - 1 byte
-	- size - 4 bytes
-	- item of appropriate type, e.g. mesh
+- version - 4-byte int
+- MESH_BUFFER
+- number of MESH - 4-byte int
+- blob of MESH
+- SKN_BUFFER
+- number of SKN - 4-byte int
+- blob of SKN
+- ANIM_BUFFER
+- number of ANIM - 4-byte int
+- blob of ANIM
 - eof
 
 ===============================
 
 .mesh
 
-- mesh type - 1 byte
-- data
+- vertex count (3 per triangle) - 4-byte int
+- for each vertex
+	- position - 3 4-byte floats
+	- normal - 3 4-byte floats
+	- color - 3 4-byte floats
+	- uv - 2 4-byte floats
+	- bone weights - 4 4-byte floats
+	- bone indices - 4 4-byte ints
+- eof
 
 ===============================
 
-.program
+.skn
 
-- size of vertex shader	- 4 bytes
-- vertex shader
-- size of fragment shader - 4 bytes
-- fragment shader
-- attributes
-- uniforms
-- mesh type-
+- bone count - 4-byte int
+- for each bone
+	- parent index - 4-byte int
+	- inverse bind matrix - 12 4-byte floats
+- eof
+
+===============================
+
+.anim
+
+- frame count - 4-byte int
+- bone count - 4-byte int
+- for each frame
+	- for each bone
+		- position - 3 4-byte floats
+		- rotation - 4 4-byte floats
+		- scale - 3 4-byte floats
+
+===============================
+
+MESH_BUFFER
+
+- number of vertices - 4-byte int
+- blob of vertices
+	- position - 3 4-byte floats
+	- normal - 3 4-byte floats
+	- color - 3 4-byte floats
+	- uv - 2 4-byte floats
+	- bone weights - 4 4-byte floats
+	- bone indices - 4 4-byte ints
+
+===============================
+
+MESH
+
+- start vertex index - 4-byte int
+- vertex count - 4-byte int
+
+===============================
+
+SKN_BUFFER
+
+- number of bones - 4-byte int
+- blob of bones
+	- parent index - 4-byte int
+	- inverse bind matrix - 12 4-byte floats
+
+===============================
+
+SKN
+
+- start bone index - 4-byte int
+- bone count - 4-byte int
+
+===============================
+
+ANIM_BUFFER
+
+- number of xf - 4-byte int
+- blob of xf
+	- position - 3 4-byte floats
+	- rotation - 4 4-byte floats
+	- scale - 3 4-byte floats
+
+===============================
+
+ANIM
+
+- start frame xf index - 4-byte int
+- frame count - 4-byte int
+
+===============================
