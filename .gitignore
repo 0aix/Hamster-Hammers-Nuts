@@ -7,6 +7,7 @@
 *.anim
 *.skn
 *.glom
+!Dist/
 
 # User-specific files
 *.suo

@@ -51,5 +51,4 @@ void main()
 		visibility -= 0.2f * (1.0f - texture(shadowmap, vec3(shadow.xy + poisson_disk[index] / 700.0f, (shadow.z - bias) / shadow.w)));
 	}
 
-	fragColor = vec4(ambience + visibility * (color / 3.1415926) * 1.8f * (smoothstep(0.0, 0.1, nl) * 0.6 + 0.4), 1.0);
 }

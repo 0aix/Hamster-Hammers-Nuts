@@ -489,8 +489,8 @@ namespace Hamster
 		glm::vec3 light_in_camera = glm::mat3(world_to_camera) * light_pos;
 
 		// Compute the MVP matrix from the light's point of view
-		glm::mat4 depthProjectionMatrix = glm::ortho<float>(-30.0f, 30.0f, -30.0f, 30.0f, -30.0f, 30.0f);
-		glm::mat4 depthViewMatrix = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 depthProjectionMatrix = glm::ortho<float>(-32.0f, 32.0f, -32.0f, 32.0f, 0.0f, 100.0f);
+		glm::mat4 depthViewMatrix = glm::lookAt(50.0f * light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		//glm::mat4 depthModelMatrix = glm::mat4(1.0);
 		//glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
 
