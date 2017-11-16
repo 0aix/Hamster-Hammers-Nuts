@@ -43,12 +43,12 @@ void main()
 	float visibility = 1.0f;
 	float bias = clamp(0.005f * tan(acos(cosTheta)), 0.0f, 1.0f);
 
-	for (int i = 0; i < 4; i++)
+	for (int i = 0; i < 16; i++)
 	{
 		//int index = i;
 		//int index = int(16.0f * random(gl_FragCoord.xyy, i)) % 16;
 		int index = int(16.0f * random(floor(position.xyz * 1000.0f), i)) % 16;
-		visibility -= 0.2f * (1.0f - texture(shadowmap, vec3(shadow.xy + poisson_disk[index] / 700.0f, (shadow.z - bias) / shadow.w)));
+		visibility -= 0.05f * (1.0f - texture(shadowmap, vec3(shadow.xy + poisson_disk[index] / 700.0f, (shadow.z - bias) / shadow.w)));
 	}
 
 	fragColor = vec4(ambience + visibility * (color / 3.1415926) * 1.5f * (smoothstep(0.0, 0.1, nl) * 0.6 + 0.4), 1.0);

@@ -13,7 +13,7 @@ namespace Hamster
 
 		bool Initialize()
 		{
-			scene = new StoryScene();
+			scene = new StoryScene2();
 			return true;
 		}
 

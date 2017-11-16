@@ -15,18 +15,19 @@ namespace Hamster
 {
 	StoryScene::StoryScene() : Scene()
 	{
-		AddObject("Hamster", TOC::HAMSTER_MESH, glm::vec3(0.0f, 0.0f, 1.5f));
+		AddObject("Hamster", TOC::HAMSTER_MESH, TOC::HAMSTER_SKN, TOC::HAMSTER_STAND_ANIM, glm::vec3(0.0f, 0.0f, 0.0f));
 		direction = Direction::Down;
+		objects["Hamster"].transform.scale = glm::vec3(3.0f);
 
-		AddObject("Hammer", TOC::HAMMER_MESH, glm::vec3(0.0f, 0.0f, 1.5f) + hammer_offset);
-
-		AddObject("Ground" + std::to_string(ground_count++), TOC::GROUND_MESH, glm::vec3(0.0f, 0.0f, 0.0f));
-		AddObject("Wall" + std::to_string(wall_count++), TOC::WALL_MESH, glm::vec3(30.0f, 0.0f, 20.0f));
-		AddObject("Wall" + std::to_string(wall_count++), TOC::WALL_MESH, glm::vec3(-30.0f, 0.0f, -20.0f));
+		AddObject("Hammer", TOC::HAMMER_PROTO_MESH, glm::vec3(0.0f, 0.0f, 1.5f) + hammer_offset);
+		
+		AddObject("Ground" + std::to_string(ground_count++), TOC::GROUND_PROTO_MESH, glm::vec3(0.0f, 0.0f, 0.0f));
+		AddObject("Wall" + std::to_string(wall_count++), TOC::WALL_PROTO_MESH, glm::vec3(30.0f, 0.0f, 20.0f));
+		AddObject("Wall" + std::to_string(wall_count++), TOC::WALL_PROTO_MESH, glm::vec3(-30.0f, 0.0f, -20.0f));
 
 		camera.set(100.0f, 0.2f * M_PI, 1.0f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
 
-		nutcounter.mesh = Mesh(TOC::NUT_MESH);
+		nutcounter.mesh = Mesh(TOC::NUT_PROTO_MESH);
 		nutcounter.transform.position = glm::vec3(-40.45f - 11.76f, 0.0f, 29.39f - 16.18f);
 	}
 
@@ -303,12 +304,12 @@ namespace Hamster
 				has_hawk = true;
 				if (mt_rand() % 2 == 0)
 				{
-					AddObject("Hawk", TOC::HAWK_MESH, glm::vec3((float)(mt_rand() % 60) - 30.0f, -30.0f, 2.0f));
+					AddObject("Hawk", TOC::HAWK_PROTO_MESH, glm::vec3((float)(mt_rand() % 60) - 30.0f, -30.0f, 2.0f));
 					hyv = 10.0f;
 				}
 				else
 				{
-					AddObject("Hawk", TOC::HAWK_MESH, glm::vec3((float)(mt_rand() % 60) - 30.0f, 30.0f, 2.0f));
+					AddObject("Hawk", TOC::HAWK_PROTO_MESH, glm::vec3((float)(mt_rand() % 60) - 30.0f, 30.0f, 2.0f));
 					hyv = -10.0f;
 				}
 			}
@@ -434,7 +435,7 @@ namespace Hamster
 				else
 				{
 					std::string name = "Log" + std::to_string(log_count++);
-					AddObject(name, TOC::LOG_MESH, pos);
+					AddObject(name, TOC::LOG_PROTO_MESH, pos);
 					RotateObject(name, (float)(mt_rand() % 4) * 0.5f * M_PI, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
 			}
@@ -489,8 +490,8 @@ namespace Hamster
 		glm::vec3 light_in_camera = glm::mat3(world_to_camera) * light_pos;
 
 		// Compute the MVP matrix from the light's point of view
-		glm::mat4 depthProjectionMatrix = glm::ortho<float>(-30.0f, 30.0f, -30.0f, 30.0f, -30.0f, 30.0f);
-		glm::mat4 depthViewMatrix = glm::lookAt(light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		glm::mat4 depthProjectionMatrix = glm::ortho<float>(-32.0f, 32.0f, -32.0f, 32.0f, 0.0f, 100.0f);
+		glm::mat4 depthViewMatrix = glm::lookAt(50.0f * light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		//glm::mat4 depthModelMatrix = glm::mat4(1.0);
 		//glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
 
@@ -500,24 +501,41 @@ namespace Hamster
 
 		// Shadows
 		static GLint depthMatrixID = glGetUniformLocation(Graphics::shadow, "depthMVP");
+		static GLint animateddepthMatrixID = glGetUniformLocation(Graphics::shadow_animated, "depthMVP");
+		static GLint shadowbones = glGetUniformLocation(Graphics::shadow_animated, "bones");
 		glBindFramebuffer(GL_FRAMEBUFFER, Graphics::FramebufferName);
 		glViewport(0, 0, 1024, 1024);
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
 
-		glUseProgram(Graphics::shadow);
-		for (auto kv : objects)
+		//glUseProgram(Graphics::shadow);
+
+		for (auto& kv : objects)
 		{
 			Object& obj = kv.second;
 			glm::mat4 local_to_world = obj.transform.make_local_to_world();
 			glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * local_to_world;
 
-			glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+			if (obj.mesh.animated)
+			{
+				obj.mesh.Update(elapsed);
+				glUseProgram(Graphics::shadow_animated);
+				glUniformMatrix4x3fv(shadowbones, obj.mesh.bind_to_world.size(), GL_FALSE, glm::value_ptr(obj.mesh.bind_to_world[0]));
+				glUniformMatrix4fv(animateddepthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+			}
+			else
+			{
+				glUseProgram(Graphics::shadow);
+				glUniformMatrix4fv(depthMatrixID, 1, GL_FALSE, &depthMVP[0][0]);
+
+			}
 			glDrawArrays(GL_TRIANGLES, obj.mesh.vertex_start, obj.mesh.vertex_count);
 		}
 
 		static GLint basic_depth_bias_mvp = glGetUniformLocation(Graphics::basic, "depth_bias_mvp");
-		static GLint shadowmap = glGetUniformLocation(Graphics::basic, "shadowmap");
+		static GLint basic_shadowmap = glGetUniformLocation(Graphics::basic, "shadowmap");
+		static GLint animated_depth_bias_mvp = glGetUniformLocation(Graphics::animated, "depth_bias_mvp");
+		static GLint animated_shadowmap = glGetUniformLocation(Graphics::animated, "shadowmap");
 		static glm::mat4 biasMatrix(
 			0.5f, 0.0f, 0.0f, 0.0f,
 			0.0f, 0.5f, 0.0f, 0.0f,
@@ -528,20 +546,30 @@ namespace Hamster
 		glViewport(0, 0, 640, 480);
 		//glEnable(GL_CULL_FACE);
 		//glCullFace(GL_BACK);
-		for (auto kv : objects)
+		for (auto& kv : objects)
 		{
 			Object& obj = kv.second;
 			glm::mat4 local_to_world = obj.transform.make_local_to_world();
 
-			// compute model view + projection (object space to clip space) matrix
+			// compute model + view + projection (object space to clip space) matrix
 			glm::mat4 mvp = world_to_clip * local_to_world;
+
+			// compute depth bias mvp
+			glm::mat4 depthBiasMVP = biasMatrix * depthProjectionMatrix * depthViewMatrix * local_to_world;
 
 			if (obj.mesh.animated)
 			{
-				obj.mesh.Update(elapsed);
+				//obj.mesh.Update(elapsed);
 				glUseProgram(Graphics::animated);
 				glUniformMatrix4fv(animated_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 				glUniformMatrix4x3fv(animated_bones, obj.mesh.bind_to_world.size(), GL_FALSE, glm::value_ptr(obj.mesh.bind_to_world[0]));
+
+				glUniformMatrix4fv(animated_depth_bias_mvp, 1, GL_FALSE, glm::value_ptr(depthBiasMVP));
+
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, Graphics::depthTexture);
+				glUniform1i(animated_shadowmap, 0);
+
 				glUniform3fv(animated_to_light, 1, glm::value_ptr(glm::normalize(light_in_camera)));
 				glDrawArrays(GL_TRIANGLES, obj.mesh.vertex_start, obj.mesh.vertex_count);
 			}
@@ -557,12 +585,11 @@ namespace Hamster
 				glUniformMatrix4fv(basic_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 				glUniformMatrix3fv(basic_itmv, 1, GL_FALSE, glm::value_ptr(itmv));
 
-				glm::mat4 depthBiasMVP = biasMatrix * depthProjectionMatrix * depthViewMatrix * local_to_world;
 				glUniformMatrix4fv(basic_depth_bias_mvp, 1, GL_FALSE, glm::value_ptr(depthBiasMVP));
 
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, Graphics::depthTexture);
-				glUniform1i(shadowmap, 0);
+				glUniform1i(basic_shadowmap, 0);
 
 				glUniform3fv(basic_to_light, 1, glm::value_ptr(glm::normalize(light_in_camera)));
 				glDrawArrays(GL_TRIANGLES, obj.mesh.vertex_start, obj.mesh.vertex_count);
@@ -615,7 +642,7 @@ namespace Hamster
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, Graphics::depthTexture);
-			glUniform1i(shadowmap, 0);
+			glUniform1i(basic_shadowmap, 0);
 
 			glUniform3fv(basic_to_light, 1, glm::value_ptr(glm::normalize(light_in_camera)));
 			glDrawArrays(GL_TRIANGLES, nutcounter.mesh.vertex_start, nutcounter.mesh.vertex_count);

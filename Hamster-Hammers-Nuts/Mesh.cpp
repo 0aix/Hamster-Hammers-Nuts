@@ -10,69 +10,74 @@ namespace Hamster
 		animated = false;
 	}
 
-	Mesh::Mesh(unsigned int meshID, unsigned int sknID, unsigned int animID)
+	Mesh::Mesh(unsigned int meshID, unsigned int sknID, unsigned int animID, bool repeat)
 	{
 		vertex_start = Assets::meshes[meshID].start;
 		vertex_count = Assets::meshes[meshID].count;
 		bone_start = Assets::skeletons[sknID].start;
 		bone_count = Assets::skeletons[sknID].count;
 		animated = true;
-		Play(animID);
+		repeating = repeat;
+		finished = false;
+		Play(animID, repeat, false);
 	}
 
-	void Mesh::Play(unsigned int animID)
+	void Mesh::Play(unsigned int animID, bool repeat, bool cont)
 	{
 		if (animated)
 		{
-			frame_start = Assets::anims[animID].start;
-			frame_count = Assets::anims[animID].count;
-			frame_number = 0;
-			frame_time = 0.0f;
-			bone_to_world = std::vector<glm::mat4x3>(bone_count);
-			bind_to_world = std::vector<glm::mat4x3>(bone_count);
-
-			for (int i = 0; i < bone_count; i++)
+			if (anim != animID || !cont)
 			{
-				const PoseBone& pose_bone = Assets::posebones[frame_start + i];
-				const Bone& bone = Assets::bones[bone_start + i];
+				frame_start = Assets::anims[animID].start;
+				frame_count = Assets::anims[animID].count;
+				frame_number = 0;
+				frame_time = 0.0f;
+				bone_to_world = std::vector<glm::mat4x3>(bone_count);
+				bind_to_world = std::vector<glm::mat4x3>(bone_count);
+				finished = false;
+				repeating = repeat;
+				anim = animID;
 
-				glm::mat3 r = glm::mat3_cast(pose_bone.rotation);
-				glm::mat3 rs = glm::mat3(r[0] * pose_bone.scale.x, r[1] * pose_bone.scale.y, r[2] * pose_bone.scale.z);
-				glm::mat4x3 trs = glm::mat4x3(rs[0], rs[1], rs[2], pose_bone.position);
+				for (int i = 0; i < bone_count; i++)
+				{
+					const PoseBone& pose_bone = Assets::posebones[frame_start + i];
+					const Bone& bone = Assets::bones[bone_start + i];
 
-				if (bone.parent == -1)
-					bone_to_world[i] = trs;
-				else
-					bone_to_world[i] = bone_to_world[bone.parent] * glm::mat4(trs);
+					glm::mat3 r = glm::mat3_cast(pose_bone.rotation);
+					glm::mat3 rs = glm::mat3(r[0] * pose_bone.scale.x, r[1] * pose_bone.scale.y, r[2] * pose_bone.scale.z);
+					glm::mat4x3 trs = glm::mat4x3(rs[0], rs[1], rs[2], pose_bone.position);
 
-				bind_to_world[i] = bone_to_world[i] * glm::mat4(bone.inverse_bind_matrix);
+					if (bone.parent == -1)
+						bone_to_world[i] = trs;
+					else
+						bone_to_world[i] = bone_to_world[bone.parent] * glm::mat4(trs);
+
+					bind_to_world[i] = bone_to_world[i] * glm::mat4(bone.inverse_bind_matrix);
+				}
 			}
 		}
 	}
 
 	void Mesh::Update(float elapsed)
 	{
-		bool update = false;
+		if (finished)
+			return;
 
 		frame_time += elapsed;
 		while (frame_time >= 1.0f / 24.0f) // 24 FPS (?)
 		{
 			if (frame_number < frame_count - 1)
 				frame_number++;
-			else
+			else if (repeating)
 				frame_number = 0;
+			else
+				finished = true;
 
 			frame_time -= 1.0f / 24.0f;
-			//update = true;
 		}
 
-		//if (!update)
-		//	return;
-
 		int offset = frame_number * bone_count;
-		int offset2 = (frame_number < frame_count - 1 ? frame_number + 1 : 0) * bone_count;
-		bone_to_world = std::vector<glm::mat4x3>(bone_count);
-		bind_to_world = std::vector<glm::mat4x3>(bone_count);
+		int offset2 = finished ? offset : ((frame_number < frame_count - 1 ? frame_number + 1 : 0) * bone_count);
 		for (int i = 0; i < bone_count; i++)
 		{
 			const PoseBone& pose_bone = Assets::posebones[frame_start + offset + i];
@@ -88,10 +93,6 @@ namespace Hamster
 			glm::mat3 r = glm::mat3_cast(rotation);
 			glm::mat3 rs = glm::mat3(r[0] * scale.x, r[1] * scale.y, r[2] * scale.z);
 			glm::mat4x3 trs = glm::mat4x3(rs[0], rs[1], rs[2], position);
-
-			//glm::mat3 r = glm::mat3_cast(pose_bone.rotation);
-			//glm::mat3 rs = glm::mat3(r[0] * pose_bone.scale.x, r[1] * pose_bone.scale.y, r[2] * pose_bone.scale.z);
-			//glm::mat4x3 trs = glm::mat4x3(rs[0], rs[1], rs[2], pose_bone.position);
 
 			if (bone.parent == -1)
 				bone_to_world[i] = trs;

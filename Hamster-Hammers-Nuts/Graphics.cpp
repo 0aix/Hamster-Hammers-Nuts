@@ -15,11 +15,18 @@ namespace Hamster
 		GLuint basic;
 		GLuint animated;
 		GLuint shadow;
+		GLuint shadow_animated;
 		GLuint FramebufferName;
 		GLuint depthTexture;
 
 		// modified https://github.com/opengl-tutorials/ogl/tree/master/common/shader.cpp
 		GLuint LoadShaders(char* vertex_file_path, char* fragment_file_path);
+
+		struct
+		{
+			int width;
+			int height;
+		}	viewport;
 
 		bool Initialize(char* name, int width, int height)
 		{
@@ -39,6 +46,9 @@ namespace Hamster
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 			SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
+			viewport.width = width;
+			viewport.height = height;
 
 			// Create window
 			if (!(window = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_OPENGL)))
@@ -73,8 +83,9 @@ namespace Hamster
 			}
 
 			basic = LoadShaders("shaders\\basic.vs", "shaders\\basic.fs");
-			//animated = LoadShaders("shaders\\animated.vs", "shaders\\basic.fs");
+			animated = LoadShaders("shaders\\animated.vs", "shaders\\basic.fs");
 			shadow = LoadShaders("shaders\\shadow.vs", "shaders\\shadow.fs");
+			shadow_animated = LoadShaders("shaders\\shadow_animated.vs", "shaders\\shadow.fs");
 
 			// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 			glGenFramebuffers(1, &FramebufferName);
