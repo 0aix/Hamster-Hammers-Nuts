@@ -13,8 +13,11 @@ namespace Hamster
 		Asset* meshes;
 		Asset* skeletons;
 		Asset* anims;
+		Asset* textures;
 		Bone* bones;
 		PoseBone* posebones;
+
+		char* texturebuffer;
 
 		bool LoadAssets(char* name)
 		{
@@ -66,6 +69,16 @@ namespace Hamster
 			ifs.read((char*)&size, 4);
 			anims = new Asset[size];
 			ifs.read((char*)anims, size * sizeof(Asset));
+
+			// TEXTURE_BUFFER
+			ifs.read((char*)&size, 4);
+			texturebuffer = new char[size];
+			ifs.read(texturebuffer, size);
+
+			// TEXTURE
+			ifs.read((char*)&size, 4);
+			textures = new Asset[size];
+			ifs.read((char*)textures, size * sizeof(Asset));
 
 			ifs.close();
 			return true;

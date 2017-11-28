@@ -1,6 +1,8 @@
 #include "Graphics.h"
+#include "Assets.h"
 #include "Mesh.h"
 #include <SDL.h>
+#include <glm/gtc/type_ptr.hpp>
 #include <fstream>
 #include <iostream>
 #include <vector>
@@ -12,21 +14,23 @@ namespace Hamster
 		SDL_Window* window;
 		SDL_GLContext context;
 
-		GLuint basic;
-		GLuint animated;
+		GLuint scene;
 		GLuint shadow;
-		GLuint shadow_animated;
-		GLuint FramebufferName;
-		GLuint depthTexture;
+		GLuint shadowbuffer;
+		GLuint shadowmap;
 
-		// modified https://github.com/opengl-tutorials/ogl/tree/master/common/shader.cpp
-		GLuint LoadShaders(char* vertex_file_path, char* fragment_file_path);
+		glm::mat4 m_world_to_camera;
+		glm::mat4 m_world_to_clip;
+		glm::mat4 m_world_to_light;
 
 		struct
 		{
 			int width;
 			int height;
 		}	viewport;
+
+		// modified https://github.com/opengl-tutorials/ogl/tree/master/common/shader.cpp
+		GLuint LoadShaders(char* vertex_file_path, char* fragment_file_path);
 
 		bool Initialize(char* name, int width, int height)
 		{
@@ -82,42 +86,47 @@ namespace Hamster
 					std::cerr << "NOTE: couldn't set vsync (" << SDL_GetError() << ")." << std::endl;
 			}
 
-			basic = LoadShaders("shaders\\basic.vs", "shaders\\basic.fs");
-			animated = LoadShaders("shaders\\animated.vs", "shaders\\basic.fs");
+			scene = LoadShaders("shaders\\scene.vs", "shaders\\scene.fs");
 			shadow = LoadShaders("shaders\\shadow.vs", "shaders\\shadow.fs");
-			shadow_animated = LoadShaders("shaders\\shadow_animated.vs", "shaders\\shadow.fs");
 
 			// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
-			glGenFramebuffers(1, &FramebufferName);
-			glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+			glGenFramebuffers(1, &shadowbuffer);
+			glBindFramebuffer(GL_FRAMEBUFFER, shadowbuffer);
 
 			// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
-			glGenTextures(1, &depthTexture);
-			glBindTexture(GL_TEXTURE_2D, depthTexture);
+			glGenTextures(1, &shadowmap);
+			glBindTexture(GL_TEXTURE_2D, shadowmap);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL); //
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE); //
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
 
-			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+			glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowmap, 0);
 
-			// No color buffer is drawn to.
+			// No color buffer is drawn to
 			glDrawBuffer(GL_NONE);
 
 			// Always check that our framebuffer is ok
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 				return false;
 
+			// Enable/set some GL defaults
+			glEnable(GL_DEPTH_TEST);
+			glDepthFunc(GL_LESS);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+
 			return true;
 		}
 
 		void Uninitialize()
 		{
-			glDeleteProgram(basic);
-			glDeleteProgram(animated);
+			glDeleteProgram(scene);
+			glDeleteProgram(shadow);
 
 			SDL_GL_DeleteContext(context);
 			SDL_DestroyWindow(window);
@@ -147,20 +156,100 @@ namespace Hamster
 			glEnableVertexAttribArray(5);
 		}
 
-		void Begin()
+		void WorldTransforms(glm::mat4& world_to_camera, glm::mat4& world_to_clip, glm::mat4& world_to_light)
 		{
-			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LESS);
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+			m_world_to_camera = world_to_camera;
+			m_world_to_clip = world_to_clip;
+			m_world_to_light = world_to_light;
+		}
 
-			glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName);
+		void BeginShadow()
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, shadowbuffer);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glViewport(0, 0, 1024, 1024);
+			glUseProgram(shadow);
+		}
+
+		void RenderShadow(const Object& object)
+		{
+			static GLint shadow_depth_mvp = glGetUniformLocation(shadow, "depth_mvp");
+			static GLint shadow_bones = glGetUniformLocation(shadow, "bones");
+			static GLint shadow_animated = glGetUniformLocation(shadow, "animated");
+
+			// compute depth mvp
+			glm::mat4 depth_mvp = m_world_to_light * object.transform.make_local_to_world();
+			glUniformMatrix4fv(shadow_depth_mvp, 1, GL_FALSE, glm::value_ptr(depth_mvp));
+
+			if (object.animated)
+			{
+				glUniformMatrix4x3fv(shadow_bones, object.anim.bind_to_world.size(), GL_FALSE, glm::value_ptr(object.anim.bind_to_world[0]));
+				glUniform1i(shadow_animated, 1);
+				for (auto it = object.anim.mesh.begin(); it != object.anim.mesh.end(); it++)
+					glDrawArrays(GL_TRIANGLES, it->vertex_start, it->vertex_count);
+			}
+			else
+			{
+				glUniform1i(shadow_animated, 0);
+				glDrawArrays(GL_TRIANGLES, object.mesh.vertex_start, object.mesh.vertex_count);
+			}
+		}
+
+		void BeginScene(glm::vec3& to_light)
+		{
+			static GLint scene_shadowmap = glGetUniformLocation(scene, "shadowmap");
+			static GLint scene_to_light = glGetUniformLocation(scene, "to_light");
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glEnable(GL_DEPTH_TEST);
-			glDepthFunc(GL_LESS);
+			glViewport(0, 0, viewport.width, viewport.height);
+			glUseProgram(scene);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, shadowmap);
+			glUniform1i(scene_shadowmap, 0);
+			glUniform3fv(scene_to_light, 1, glm::value_ptr(to_light));
+		}
+
+		void RenderScene(const Object& object)
+		{
+			static glm::mat4 bias(0.5f, 0.0f, 0.0f, 0.0f,
+								  0.0f, 0.5f, 0.0f, 0.0f,
+								  0.0f, 0.0f, 0.5f, 0.0f,
+								  0.5f, 0.5f, 0.5f, 1.0f);
+			static GLint scene_mvp = glGetUniformLocation(scene, "mvp");
+			static GLint scene_depth_bias_mvp = glGetUniformLocation(scene, "depth_bias_mvp");
+			static GLint scene_bones = glGetUniformLocation(scene, "bones");
+			static GLint scene_itmv = glGetUniformLocation(scene, "itmv");
+			static GLint scene_animated = glGetUniformLocation(scene, "animated");
+
+			// compute model + view + projection (object space to clip space) matrix
+			glm::mat4 local_to_world = object.transform.make_local_to_world();
+			glm::mat4 mvp = m_world_to_clip * local_to_world;
+
+			// compute depth bias mvp
+			glm::mat4 depth_bias_mvp = bias * m_world_to_light * local_to_world;
+
+			glUniformMatrix4fv(scene_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
+			glUniformMatrix4fv(scene_depth_bias_mvp, 1, GL_FALSE, glm::value_ptr(depth_bias_mvp));
+
+			if (object.animated)
+			{
+				glUniformMatrix4x3fv(scene_bones, object.anim.bind_to_world.size(), GL_FALSE, glm::value_ptr(object.anim.bind_to_world[0]));
+				glUniform1i(scene_animated, 1);
+				for (auto it = object.anim.mesh.begin(); it != object.anim.mesh.end(); it++)
+					glDrawArrays(GL_TRIANGLES, it->vertex_start, it->vertex_count);
+			}
+			else
+			{
+				// compute model view (object space to camera local space) matrix
+				glm::mat4 mv = m_world_to_camera * local_to_world;
+				// NOTE: inverse cancels out transpose unless there is scale involved
+				glm::mat3 itmv = glm::inverse(glm::transpose(glm::mat3(mv)));
+
+				glUniformMatrix3fv(scene_itmv, 1, GL_FALSE, glm::value_ptr(itmv));
+				glUniform1i(scene_animated, 0);
+				glDrawArrays(GL_TRIANGLES, object.mesh.vertex_start, object.mesh.vertex_count);
+			}
 		}
 
 		void Present()
@@ -222,12 +311,12 @@ namespace Hamster
 			GLuint ProgramID = glCreateProgram();
 			glAttachShader(ProgramID, VertexShaderID);
 			glAttachShader(ProgramID, FragmentShaderID);
-			glBindAttribLocation(ProgramID, 0, "Position");
-			glBindAttribLocation(ProgramID, 1, "Normal");
-			glBindAttribLocation(ProgramID, 2, "Color");
-			glBindAttribLocation(ProgramID, 3, "TexCoord");
-			glBindAttribLocation(ProgramID, 4, "BoneWeights");
-			glBindAttribLocation(ProgramID, 5, "BoneIndices");
+			//glBindAttribLocation(ProgramID, 0, "Position");
+			//glBindAttribLocation(ProgramID, 1, "Normal");
+			//glBindAttribLocation(ProgramID, 2, "Color");
+			//glBindAttribLocation(ProgramID, 3, "TexCoord");
+			//glBindAttribLocation(ProgramID, 4, "BoneWeights");
+			//glBindAttribLocation(ProgramID, 5, "BoneIndices");
 			glLinkProgram(ProgramID);
 
 			// Check the program

@@ -50,6 +50,12 @@
 
 ===============================
 
+.txt
+
+- metadata for sprites
+
+===============================
+
 MESH_BUFFER
 
 - number of vertices - 4-byte int
@@ -100,5 +106,27 @@ ANIM
 
 - start frame xf index - 4-byte int
 - frame count - 4-byte int
+
+===============================
+
+TEXTURE_BUFFER
+
+- size of pngs - 4-byte int
+- blob of pngs
+
+===============================
+
+TEXTURE
+
+- start png index
+- size of png
+
+===============================
+
+SPRITE_BUFFER
+
+- number of sprites - 4-byte int
+- blob of sprites
+	- stuv - 4 4-byte floats
 
 ===============================
