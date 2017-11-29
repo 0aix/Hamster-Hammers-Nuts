@@ -125,12 +125,11 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ExampleScene.cpp" />
+    <ClCompile Include="StoryScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="gl_shims.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="MainMenuScene.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Scene.cpp" />

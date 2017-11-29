@@ -1,5 +1,7 @@
 #include "Scene.h"
 #include "Graphics.h"
+#include "Game.h"
+
 
 namespace Hamster
 {
@@ -10,12 +12,15 @@ namespace Hamster
 		elapsed = 0.0f;
 	}
 
-	Object& Scene::AddObject(const std::string& name, unsigned int meshID, glm::vec3& position, glm::quat& rotation, glm::vec3& scale)
+	Object& Scene::AddObject(const std::string& name, unsigned int meshID, glm::vec3& position, glm::vec3& dimension, glm::quat& rotation, glm::vec3& scale)
 	{
 		Object object;
 		object.transform.position = position;
 		object.transform.rotation = rotation;
 		object.transform.scale = scale;
+		object.height = dimension.z;
+		object.length = dimension.x;
+		object.width = dimension.y;
 		object.mesh = Mesh(meshID);
 		object.animated = false;
 		objects.push_back(object);
@@ -33,10 +38,29 @@ namespace Hamster
 	//	return objects[name];
 	//}
 	//
-	//void Scene::RotateObject(const std::string& name, float degrees, glm::vec3 axis)
-	//{
-	//	if (degrees == 0.0f)
-	//		return;
-	//	objects[name].transform.rotation = glm::rotate(objects[name].transform.rotation, degrees, axis);
-	//}
+	void Scene::RotateObject(Object* obj, float degrees, glm::vec3 axis)
+	{
+		if (degrees == 0.0f) {
+			return;
+		}
+		auto quart = obj->transform.rotation;
+		quart = glm::rotate(quart, degrees, axis);
+		obj->transform.rotation = quart;
+	}
+
+	void Scene::RotateDirection(Object* obj, Direction direction)
+	{
+		auto quart = glm::quat(1.0f,0.0f,0.0f,0.0f);
+		float degrees;
+		if (direction == Direction::Up)
+			degrees = 0.5f*M_PI;
+		else if (direction == Direction::Down)
+			degrees = 1.5f*M_PI;
+		else if (direction == Direction::Left)
+			degrees = M_PI;
+		else if (direction == Direction::Right)
+			degrees = 0.0f;
+		quart = glm::rotate(quart, degrees, glm::vec3(0.0f,0.0f,1.0f));
+		obj->transform.rotation = quart;
+	}
 }

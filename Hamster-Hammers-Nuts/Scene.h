@@ -21,14 +21,16 @@ namespace Hamster
 	public:
 		Scene();
 		Object& AddObject(const std::string& name, unsigned int meshID, 
-						  glm::vec3& position, 
-						  glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 
-						  glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
+			glm::vec3& position, 
+			glm::vec3& dimension,
+			glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 
+			glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
 		//Object& AddObject(const std::string& name, unsigned int meshID, unsigned int sknID, unsigned int animID,
 		//				  glm::vec3& position,
 		//				  glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
 		//				  glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
-		//void RotateObject(const std::string& name, float degrees, glm::vec3 axis);
+		void RotateObject(Object* obj, float degrees, glm::vec3 axis);
+		void RotateDirection(Object* obj, Direction direction);
 
 		virtual bool HandleInput() = 0;
 		virtual bool Update() = 0;
@@ -45,17 +47,37 @@ namespace Hamster
 		std::vector<Object> objects;
 	};
 
-	class ExampleScene : public Scene
+	class StoryScene : public Scene
 	{
 	public:
-		ExampleScene();
+		StoryScene();
 		bool HandleInput();
 		bool Update();
 		void Render();
 
 	private:
+		int level = 2;
 		Object hamster;
+		Object ground;
+		Object ladder;
 		Direction direction;
+		Object& AddLog();
+		Object& AddNut();
+		std::vector<Object> logs;
+		std::vector<Object> nuts;
+		int nut_count = 0;
+		int log_count = 0;
+		float gravity = 5.0f;
+		bool on_ladder = false;
+		bool fell = false;
+		bool has_hawk = false;
+		float hawk_time;
+		int max_score = 5;
+		float stun = 0.0f;
+		float windv = 0.0f;
+		float windt = 0.0f;
+		int score = 0;
+		float next_drop = 5.0f;
 
 		bool swinging = false;
 	};
@@ -89,8 +111,6 @@ namespace Hamster
 	//	float hv;
 	//	float hd;
 	//	float next_drop = 5.0f;
-	//	int nut_count = 0;
-	//	int log_count = 0;
 	//	int ground_count = 0;
 	//	int wall_count = 0;
 	//	Direction direction;
@@ -118,27 +138,11 @@ namespace Hamster
 	//
 	//	glm::vec3 hammer_offset = glm::vec3(0.0f, 0.0f, 0.5f);
 	//	glm::vec3 center = glm::vec3(0.0f);
-	//	bool on_ladder = false;
-	//	bool fell = false;
-	//	bool has_hawk = false;
-	//	float hawk_time;
-	//	float hxv;
-	//	float hyv;
-	//	float hzv = 0.0f;
-	//	int max = 5;
-	//	float stun = 0.0f;
-	//	float windv = 0.0f;
-	//	float windt = 0.0f;
-	//	int score = 0;
 	//	float xv;
 	//	float yv;
 	//	float zv = 0.0f;
 	//	float hv;
 	//	float hd;
-	//	float next_drop = 5.0f;
-	//	int nut_count = 0;
-	//	int log_count = 0;
-	//	Direction direction;
 	//
 	//	Object nutcounter;
 	//};
