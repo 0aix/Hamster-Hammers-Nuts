@@ -57,27 +57,28 @@ namespace Hamster
 
 	private:
 		int level = 2;
+		bool grabbed = false;
+		float speed = 7.5f;
 		Object hamster;
 		Object ground;
 		Object ladder;
+		Object hawk;
 		Direction direction;
-		Object& AddLog();
-		Object& AddNut();
-		std::vector<Object> logs;
-		std::vector<Object> nuts;
-		int nut_count = 0;
-		int log_count = 0;
-		float gravity = 5.0f;
+		Object* AddNut(glm::vec3 position, glm::quat rotation);
+		Object* AddLog(glm::vec3 position, glm::quat rotation);
+		std::vector<Object*> logs;
+		std::vector<Object*> nuts;
+		float gravity = 9.0f;
 		bool on_ladder = false;
-		bool fell = false;
-		bool has_hawk = false;
-		float hawk_time;
-		int max_score = 5;
+		bool transition = false;
+		int max_score = 1;
 		float stun = 0.0f;
 		float windv = 0.0f;
 		float windt = 0.0f;
 		int score = 0;
-		float next_drop = 5.0f;
+		float next_drop = 1.0f;
+		float drop_interval = 1.0f;
+		bool preparing = false;
 
 		bool swinging = false;
 	};

@@ -30,6 +30,7 @@ namespace Hamster
 		float height;
 		float width;
 		float length;
+		glm::quat base_rotation;
 	};
 
 	struct Camera
