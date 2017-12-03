@@ -10,14 +10,12 @@ namespace Hamster
 {
 	namespace Assets
 	{
-		Asset* meshes;
-		Asset* skeletons;
-		Asset* anims;
-		Asset* textures;
+		Entry* meshes;
+		Entry* skeletons;
+		Entry* anims;
 		Bone* bones;
 		PoseBone* posebones;
-
-		char* texturebuffer;
+		GLuint* textures;
 
 		bool LoadAssets(char* name)
 		{
@@ -47,8 +45,8 @@ namespace Hamster
 
 			// MESH
 			ifs.read((char*)&size, 4);
-			meshes = new Asset[size];
-			ifs.read((char*)meshes, size * sizeof(Asset));
+			meshes = new Entry[size];
+			ifs.read((char*)meshes, size * sizeof(Entry));
 
 			// SKN_BUFFER
 			ifs.read((char*)&size, 4);
@@ -57,8 +55,8 @@ namespace Hamster
 
 			// SKN
 			ifs.read((char*)&size, 4);
-			skeletons = new Asset[size];
-			ifs.read((char*)skeletons, size * sizeof(Asset));
+			skeletons = new Entry[size];
+			ifs.read((char*)skeletons, size * sizeof(Entry));
 
 			// ANIM_BUFFER
 			ifs.read((char*)&size, 4);
@@ -67,18 +65,31 @@ namespace Hamster
 
 			// ANIM
 			ifs.read((char*)&size, 4);
-			anims = new Asset[size];
-			ifs.read((char*)anims, size * sizeof(Asset));
+			anims = new Entry[size];
+			ifs.read((char*)anims, size * sizeof(Entry));
 
 			// TEXTURE_BUFFER
 			ifs.read((char*)&size, 4);
-			texturebuffer = new char[size];
-			ifs.read(texturebuffer, size);
+			char* buffer = new char[size];
+			ifs.read(buffer, size);
 
 			// TEXTURE
 			ifs.read((char*)&size, 4);
-			textures = new Asset[size];
-			ifs.read((char*)textures, size * sizeof(Asset));
+			Entry* pngs = new Entry[size];
+			ifs.read((char*)pngs, size * sizeof(Entry));
+			textures = new GLuint[size];
+			for (int i = 0; i < size; i++)
+				textures[i] = Graphics::LoadTexture(&buffer[pngs[i].start], pngs[i].count);
+			delete[] buffer;
+			delete[] pngs;
+
+			// SPRITE_BUFFER
+
+			// SPRITE
+
+			// SOUND_BUFFER
+
+			// SOUND
 
 			ifs.close();
 			return true;

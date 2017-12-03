@@ -5,8 +5,7 @@ in vec3 normal;
 in vec3 color;
 in vec4 shadow;
 
-layout(location = 0) out vec4 fragColor;
-layout(location = 1) out vec3 normalColor;
+out vec4 fragColor;
 
 uniform vec3 to_light;
 uniform sampler2DShadow shadowmap;
@@ -37,8 +36,7 @@ float random(vec3 seed, int i)
 
 void main()
 {
-	vec3 norm = normalize(normal);
-	float nl = dot(norm, to_light);
+	float nl = dot(normalize(normal), to_light);
 	float cosTheta = clamp(nl, 0.0f, 1.0f);
 
 	float visibility = 1.0f;
@@ -49,7 +47,7 @@ void main()
 		//int index = i;
 		//int index = int(16.0f * random(gl_FragCoord.xyy, i)) % 16;
 		int index = int(16.0f * random(floor(position.xyz * 1000.0f), i)) % 16;
-		visibility -= 0.05f * (1.0f - texture(shadowmap, vec3(shadow.xy + poisson_disk[index] / 1200.0, (shadow.z - bias) / shadow.w)));
+		visibility -= 0.05f * (1.0f - texture(shadowmap, vec3(shadow.xy + poisson_disk[index] / 700.0f, (shadow.z - bias) / shadow.w)));
 	}
 
 	//float intensity = nl; // max(0.0, nl * visibility)
@@ -61,11 +59,9 @@ void main()
     else if (intensity > 0.50) coeff = 0.75;
     else if (intensity > 0.25) coeff = 0.50;
     else                       coeff = 0.25;
-	vec3 ambient = 0.7 * color;
+	vec3 ambient = 0.7f * color;
 	//fragColor = vec4(ambient + 0.5f * visibility * color * (smoothstep(0.0, 0.1, nl) * 0.6 + 0.4), 1.0);
 	//fragColor = vec4(ambient + 0.5f * visibility * color * color2, 1.0);
-	fragColor = vec4(ambient + 0.5 * coeff * color, 1.0);
+	fragColor = vec4(ambient + 0.5f * coeff * color, 1.0);
 	//fragColor = vec4(ambient + 0.5f * visibility * color * (smoothstep(0.0, 0.1, nl) * 0.6 + 0.4), 1.0);
-
-	normalColor = (norm + vec3(1.0, 1.0, 1.0)) * 0.5;
 }

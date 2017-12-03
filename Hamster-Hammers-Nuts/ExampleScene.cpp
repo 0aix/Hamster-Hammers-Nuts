@@ -14,8 +14,8 @@ namespace Hamster
 {
 	ExampleScene::ExampleScene() : Scene()
 	{
-		hamster.transform.rotation = glm::rotate(glm::quat(1.0f, 0.0f, 0.0f, 0.0f), (float)(-1.5f * M_PI), glm::vec3(0.0f, 0.0f, 1.0f));
-		hamster.transform.scale = glm::vec3(3.0f);
+		hamster.transform.rotation = glm::rotate(glm::quat(1.0f, 0.0f, 0.0f, 0.0f), (float)(-0.5f * M_PI), glm::vec3(0.0f, 0.0f, 1.0f));
+		hamster.transform.scale = glm::vec3(18.0f);
 		hamster.anim = Animation(TOC::HAMSTER_SKN, TOC::HAMSTER_STAND_ANIM);
 		hamster.anim.mesh.emplace_back(TOC::HAMSTER_BODY_MESH);
 		hamster.anim.mesh.emplace_back(TOC::HAMSTER_EYES_MESH);
@@ -38,10 +38,12 @@ namespace Hamster
 		}
 
 		if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_EQUALS)
-			hamster.transform.scale += glm::vec3(0.1f);
+			hamster.transform.position += glm::vec3(0.0f, 0.0f, 0.5f);
+			//hamster.transform.scale += glm::vec3(0.1f);
 		else if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_MINUS)
-			if (hamster.transform.scale.x > 0.2f)
-				hamster.transform.scale -= glm::vec3(0.1f);
+			hamster.transform.position -= glm::vec3(0.0f, 0.0f, 0.5f);
+			//if (hamster.transform.scale.x > 0.2f)
+			//	hamster.transform.scale -= glm::vec3(0.1f);
 
 		return true;
 	}
@@ -95,15 +97,16 @@ namespace Hamster
 
 		// shadow map
 		Graphics::BeginShadow();
+		Graphics::RenderShadow(hamster);
 		for (auto it = objects.begin(); it != objects.end(); it++)
 			Graphics::RenderShadow(*it);
-		Graphics::RenderShadow(hamster);
 
 		// scene
 		Graphics::BeginScene(to_light);
+		Graphics::RenderScene(hamster);
 		for (auto it = objects.begin(); it != objects.end(); it++)
 			Graphics::RenderScene(*it);
-		Graphics::RenderScene(hamster);
+		Graphics::CompositeScene();
 
 		// ui
 		//Graphics::UI(); / Graphics::Basic() / ::Draw()
