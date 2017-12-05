@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Assets.h"
 #include "Object.h"
 #include "GL.hpp"
 #include <glm/glm.hpp>
@@ -10,7 +11,9 @@ namespace Hamster
 	{
 		bool Initialize(char* name, int width, int height);
 		void Uninitialize();
+
 		void LoadBufferData(void* data, int size);
+		GLuint LoadTexture(char* data, int size);
 
 		void WorldTransforms(glm::mat4& world_to_camera, glm::mat4& world_to_clip, glm::mat4& world_to_light);
 
@@ -19,7 +22,12 @@ namespace Hamster
 
 		void BeginScene(glm::vec3& to_light);
 		void RenderScene(const Object& object);
-		
+		void CompositeScene();
+
+		void BeginSprite();
+		void DrawSprite();
+		void RenderSprite();
+
 		void Present();
 	}
 }

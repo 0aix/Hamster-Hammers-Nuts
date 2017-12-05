@@ -24,6 +24,7 @@ namespace Hamster
 		Mesh mesh;
 		Animation anim;
 		bool animated;
+
 		glm::vec3 velocity;
 		float av;
 		glm::vec3 rotation_axis;

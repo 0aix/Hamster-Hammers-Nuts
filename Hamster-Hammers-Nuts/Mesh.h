@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GL.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <vector>
@@ -13,6 +14,7 @@ namespace Hamster
 
 		int vertex_start;
 		int vertex_count;
+		GLuint texture;
 	};
 
 	enum class AnimationState

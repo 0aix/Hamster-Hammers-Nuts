@@ -27,17 +27,6 @@ namespace Hamster
 		return objects.back();
 	}
 	
-	//Object& Scene::AddObject(const std::string& name, unsigned int meshID, unsigned int sknID, unsigned int animID, glm::vec3& position, glm::quat& rotation, glm::vec3& scale)
-	//{
-	//	Object object;
-	//	object.transform.position = position;
-	//	object.transform.rotation = rotation;
-	//	object.transform.scale = scale;
-	//	object.mesh = Mesh(meshID, sknID, animID);
-	//	objects[name] = object;
-	//	return objects[name];
-	//}
-	//
 	void Scene::RotateObject(Object* obj, float degrees, glm::vec3 axis)
 	{
 		if (degrees == 0.0f) {

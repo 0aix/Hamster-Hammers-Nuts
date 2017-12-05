@@ -2,20 +2,18 @@
 
 #include "Mesh.h"
 #include "TOC.h"
-
+#include "GL.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 
 namespace Hamster
 {
-	// Not really an asset :S
-	struct Asset
+	struct Entry
 	{
 		int start;
 		int count;
 	};
 
-	// Not actually necessary :S
 	struct Vertex
 	{
 		glm::vec3 position;
@@ -28,12 +26,12 @@ namespace Hamster
 
 	namespace Assets
 	{
-		extern Asset* meshes;
-		extern Asset* skeletons;
-		extern Asset* anims;
-		extern Asset* textures;
+		extern Entry* meshes;
+		extern Entry* skeletons;
+		extern Entry* anims;
 		extern Bone* bones;
 		extern PoseBone* posebones;
+		extern GLuint* textures;
 
 		bool LoadAssets(char* name);
 	}

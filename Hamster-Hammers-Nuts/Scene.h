@@ -13,22 +13,23 @@ namespace Hamster
 		Left,
 		Right,
 		Down,
-		Up
+		Up,
+		LeftDown,
+		LeftUp,
+		RightDown,
+		RightUp
 	};
 
 	class Scene
 	{
 	public:
 		Scene();
-		Object& AddObject(const std::string& name, unsigned int meshID, 
-			glm::vec3& position, 
-			glm::vec3& dimension,
-			glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 
-			glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
-		//Object& AddObject(const std::string& name, unsigned int meshID, unsigned int sknID, unsigned int animID,
-		//				  glm::vec3& position,
-		//				  glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
-		//				  glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
+		Object& AddObject(const std::string& name,
+						  unsigned int meshID, 
+						  glm::vec3& position, 
+						  glm::vec3& dimension,
+						  glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 
+						  glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
 		void RotateObject(Object* obj, float degrees, glm::vec3 axis);
 		void RotateDirection(Object* obj, Direction direction);
 
@@ -58,7 +59,7 @@ namespace Hamster
 	private:
 		int level = 2;
 		bool grabbed = false;
-		float speed = 7.5f;
+		float speed = 15.0f;
 		Object hamster;
 		Object ground;
 		Object ladder;
@@ -69,8 +70,8 @@ namespace Hamster
 		std::vector<Object*> logs;
 		std::vector<Object*> nuts;
 		float gravity = 9.0f;
-		bool on_ladder = false;
-		bool transition = false;
+		//bool on_ladder = false;
+		//bool transition = false;
 		int max_score = 1;
 		float stun = 0.0f;
 		float windv = 0.0f;
@@ -78,73 +79,32 @@ namespace Hamster
 		int score = 0;
 		float next_drop = 1.0f;
 		float drop_interval = 1.0f;
-		bool preparing = false;
+		//bool preparing = false;
 
-		bool swinging = false;
+		//bool swinging = false;
+		enum class State
+		{
+			Idle,
+			Walking,
+			Swinging,
+			Stunned,
+			OnLadder0,
+			OnLadder1,
+			OnLadder2,
+			Falling0,
+			Falling1,
+			Hawked
+		} state;
 	};
 
-	//class StoryScene : public Scene
-	//{
-	//public:
-	//	StoryScene();
-	//	bool HandleInput();
-	//	bool Update();
-	//	void Render();
-	//
-	//private:
-	//	glm::vec3 hammer_offset = glm::vec3(-1.0f, -1.0f, 0.5f);
-	//	glm::vec3 center = glm::vec3(0.0f);
-	//	bool on_ladder = false;
-	//	bool fell = false;
-	//	bool has_hawk = false;
-	//	float hawk_time;
-	//	float hxv;
-	//	float hyv;
-	//	float hzv = 0.0f;
-	//	int max = 5;
-	//	float stun = 0.0f;
-	//	float windv = 0.0f;
-	//	float windt = 0.0f;
-	//	int score = 0;
-	//	float xv;
-	//	float yv;
-	//	float zv = 0.0f;
-	//	float hv;
-	//	float hd;
-	//	float next_drop = 5.0f;
-	//	int ground_count = 0;
-	//	int wall_count = 0;
-	//	Direction direction;
-	//
-	//	Object nutcounter;
-	//};
-	//
-	//class StoryScene2 : public Scene
-	//{
-	//public:
-	//	StoryScene2();
-	//	bool HandleInput();
-	//	bool Update();
-	//	void Render();
-	//
-	//private:
-	//	Object hamster;
-	//	Object eyes;
-	//	Object hammer;
-	//	std::list<Object> nuts;
-	//	std::list<Object> logs;
-	//
-	//	bool swinging = false;
-	//	bool gettingready = false;
-	//
-	//	glm::vec3 hammer_offset = glm::vec3(0.0f, 0.0f, 0.5f);
-	//	glm::vec3 center = glm::vec3(0.0f);
-	//	float xv;
-	//	float yv;
-	//	float zv = 0.0f;
-	//	float hv;
-	//	float hd;
-	//
-	//	Object nutcounter;
-	//};
+	class MainMenu : public Scene
+	{
+	public:
+		MainMenu();
+		bool HandleInput();
+		bool Update();
+		void Render();
+
+	private:
+	};
 }
