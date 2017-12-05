@@ -19,6 +19,7 @@ namespace Hamster
 		GLuint scene;
 		GLuint shadow;
 		GLuint composite;
+		GLuint sprite;
 
 		GLuint shadowbuffer;
 		GLuint shadowmap; // RESERVED TEXTURE0
@@ -101,6 +102,7 @@ namespace Hamster
 			scene = LoadShaders("shaders\\scene.vs", "shaders\\scene.fs");
 			shadow = LoadShaders("shaders\\shadow.vs", "shaders\\shadow.fs");
 			composite = LoadShaders("shaders\\composite.vs", "shaders\\composite.fs");
+			sprite = LoadShaders("shaders\\sprite.vs", "shaders\\sprite.fs");
 
 			// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 			glGenFramebuffers(1, &shadowbuffer);
@@ -183,6 +185,8 @@ namespace Hamster
 			// Enable/set some GL defaults
 			glEnable(GL_DEPTH_TEST);
 			glDepthFunc(GL_LESS);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			return true;
 		}
@@ -328,8 +332,7 @@ namespace Hamster
 			static GLint scene_to_light = glGetUniformLocation(scene, "to_light");
 
 			glBindFramebuffer(GL_FRAMEBUFFER, scenebuffer);
-			glClearColor(0.5f, 0.5f, 0.0f, 1.0f);
-			//glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+			glClearColor(0.5f, 0.5f, 0.0f, 0.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glViewport(0, 0, viewport.width, viewport.height);
 			glUseProgram(scene);
@@ -389,7 +392,7 @@ namespace Hamster
 			static GLint m_depthmap = glGetUniformLocation(composite, "depthmap");
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+			glClearColor(176.0f / 255.0f, 226.0f / 255.0f, 1.0f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glViewport(0, 0, viewport.width, viewport.height);
 			glUseProgram(composite);

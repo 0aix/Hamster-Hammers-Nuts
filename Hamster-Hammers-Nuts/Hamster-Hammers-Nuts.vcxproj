@@ -125,7 +125,7 @@
     <ClCompile Include="Animation.cpp" />
     <ClCompile Include="Assets.cpp" />
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="ExampleScene.cpp" />
+    <ClCompile Include="StoryScene.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="gl_shims.cpp" />
     <ClCompile Include="Graphics.cpp" />

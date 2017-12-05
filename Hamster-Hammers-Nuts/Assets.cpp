@@ -83,10 +83,6 @@ namespace Hamster
 			delete[] buffer;
 			delete[] pngs;
 
-			// SPRITE_BUFFER
-
-			// SPRITE
-
 			// SOUND_BUFFER
 
 			// SOUND

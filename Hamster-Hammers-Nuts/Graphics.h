@@ -24,6 +24,10 @@ namespace Hamster
 		void RenderScene(const Object& object);
 		void CompositeScene();
 
+		void BeginSprite();
+		void DrawSprite();
+		void RenderSprite();
+
 		void Present();
 	}
 }
