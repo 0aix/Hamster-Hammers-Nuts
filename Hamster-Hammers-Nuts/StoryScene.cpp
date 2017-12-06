@@ -723,6 +723,10 @@ namespace Hamster
 				break;
 			}
 			Graphics::RenderScene(target, 0.75f);
+			target.transform.position = hamster.transform.position;
+			//target.transform.scale = glm::vec3(0.4f, 0.4f, 0.001f);
+			Graphics::RenderScene(target, 0.75f);
+			//target.transform.scale = glm::vec3(1.0f, 1.0f, 0.001f);
 		}
 
 		// background
