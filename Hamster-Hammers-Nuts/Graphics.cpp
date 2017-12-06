@@ -317,7 +317,7 @@ namespace Hamster
 		void BeginShadow()
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, shadowbuffer);
-			glViewport(0, 0, 1024, 1024);
+			glViewport(0, 0, 2048, 2048);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glUseProgram(shadow);
 			glBindVertexArray(vao);
