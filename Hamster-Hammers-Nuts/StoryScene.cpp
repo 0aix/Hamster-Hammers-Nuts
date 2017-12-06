@@ -14,6 +14,8 @@
 #define GROUND_WIDTH 15
 #define GROUND_LENGTH 15
 #define DROP_HEIGHT 15
+#define SWING_FACTOR 1.3f
+#define WALK_FACTOR 1.8f
 
 namespace Hamster
 {
@@ -78,7 +80,9 @@ namespace Hamster
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
 
-		hawk.mesh = Mesh(TOC::ARMATURE_SKN);
+		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
+		hawk.anim.mesh.emplace_back(TOC::ARMATURE_BODY_MESH);
+		hawk.animated = true;
 		hawk.transform.scale = glm::vec3(4.0f);
 		
 		hawk.transform.position = glm::vec3(0.0f,70.0f,4.0f);
@@ -93,21 +97,12 @@ namespace Hamster
 
 	bool StoryScene::HandleInput()
 	{
-		//if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_SPACE && stun == 0.0f && !on_ladder && !swinging)
 		if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_SPACE && state <= State::Walking)
 		{
 			hamster.velocity = glm::vec3(0.0f);
-			hamster.anim.Play(TOC::HAMSTER_SWING_ANIM, false);
+			hamster.anim.Play(TOC::HAMSTER_SWING_ANIM, false, true, SWING_FACTOR);
 			state = State::Swinging;
-			//swinging = true; // should use state variable...
 		}
-
-		//if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_EQUALS)
-		//	hamster.transform.scale += glm::vec3(0.1f);
-		//else if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_MINUS)
-		//	if (hamster.transform.scale.x > 0.2f)
-		//		hamster.transform.scale -= glm::vec3(0.1f);
-
 		return true;
 	}
 
@@ -363,7 +358,7 @@ namespace Hamster
 		}
 		else if (state == State::Walking)
 		{
-			hamster.anim.Play(TOC::HAMSTER_WALK_ANIM);
+			hamster.anim.Play(TOC::HAMSTER_WALK_ANIM, true, true, WALK_FACTOR);
 		}
 
 		next_drop -= elapsed;
@@ -705,6 +700,12 @@ namespace Hamster
 			}
 			Graphics::RenderScene(target, 0.7f);
 		}
+
+		// background
+		Graphics::BeginSprite();
+		Graphics::RenderSprite(TOC::SKY_PNG, glm::vec2(0.0f, 0.0f), glm::vec2(2.0f, 2.0f));
+
+		// actual scene
 		Graphics::CompositeScene();
 
 		// ui
