@@ -2,7 +2,6 @@
 #include "Graphics.h"
 #include "Game.h"
 
-
 namespace Hamster
 {
 	Scene::Scene()

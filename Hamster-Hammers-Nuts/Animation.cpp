@@ -3,15 +3,15 @@
 
 namespace Hamster
 {
-	Animation::Animation(unsigned int sknID, unsigned int animID, bool repeat)
+	Animation::Animation(unsigned int sknID, unsigned int animID, bool repeat, float factor)
 	{
 		bone_start = Assets::skeletons[sknID].start;
 		bone_count = Assets::skeletons[sknID].count;
 		state = repeat ? AnimationState::REPEAT : AnimationState::PLAYING;
-		Play(animID, repeat, false);
+		Play(animID, repeat, false, factor);
 	}
 
-	void Animation::Play(unsigned int animID, bool repeat, bool cont)
+	void Animation::Play(unsigned int animID, bool repeat, bool cont, float factor)
 	{
 		if (anim != animID || !cont)
 		{
@@ -19,6 +19,7 @@ namespace Hamster
 			frame_count = Assets::anims[animID].count;
 			frame_number = 0;
 			frame_time = 0.0f;
+			elapsed_factor = factor;
 			bone_to_world = std::vector<glm::mat4x3>(bone_count);
 			bind_to_world = std::vector<glm::mat4x3>(bone_count);
 			state = repeat ? AnimationState::REPEAT : AnimationState::PLAYING;
@@ -48,7 +49,7 @@ namespace Hamster
 		if (state == AnimationState::FINISHED)
 			return;
 
-		frame_time += elapsed;
+		frame_time += elapsed * elapsed_factor;
 		while (frame_time >= 1.0f / 24.0f) // 24 FPS (?)
 		{
 			if (frame_number < frame_count - 1)
