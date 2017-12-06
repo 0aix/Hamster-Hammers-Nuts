@@ -70,7 +70,7 @@ namespace Hamster
 		hamster.animated = true;
 		direction = Direction::Down;
 
-		ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
+		ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
 		ground.transform.scale = glm::vec3(0.5f);
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
@@ -78,7 +78,7 @@ namespace Hamster
 		hawk.mesh = Mesh(TOC::ARMATURE_SKN);
 		hawk.transform.scale = glm::vec3(4.0f);
 		
-		hawk.transform.position = glm::vec3(0.0f,70.0f,3.0f);
+		hawk.transform.position = glm::vec3(0.0f,70.0f,4.0f);
 		hawk.height = 3.0f;
 		hawk.length = 2.0f;
 		hawk.width = 4.0f;
@@ -450,17 +450,19 @@ namespace Hamster
 				it++;
 		}
 		//wind
-		if (windt != 0.0f) {
-			windt -= elapsed;
-			if (windt < 0.0f) {
-				windt = 0.0f;
-				windv = 0.0f;
+		if (level >= 7) {
+			if (windt != 0.0f) {
+				windt -= elapsed;
+				if (windt < 0.0f) {
+					windt = 0.0f;
+					windv = 0.0f;
+				}
 			}
-		}
-		else {
-			int dir = mt_rand() % 3;
-			windt = 10.0f;
-			windv = 2.5f*(dir - 1);
+			else {
+				int dir = mt_rand() % 3;
+				windt = 10.0f;
+				windv = 2.5f*(dir - 1);
+			}
 		}
 		//Log rolling not fully working
 		for (auto log : logs) {
@@ -475,24 +477,25 @@ namespace Hamster
 		for (auto nut : nuts) {
 			nut->velocity.y = windv;
 		}
-		if (hawk.transform.position.y > 60.0f) {
-			hawk.velocity.y = -10.0f;
-			hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
-		}
-		if (hawk.transform.position.y < -60.0f) {
-			hawk.velocity.y = 10.0f;
-			hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
-		}
-		if (abs(hawk.transform.position.x - hamster.transform.position.x) < 2.0f && abs(hawk.transform.position.y - hamster.transform.position.y) < 2.0f &&
-			abs(hamster.transform.position.x) - 2.0f * hamster.length < GROUND_LENGTH &&
-			abs(hamster.transform.position.y) - 2.0f * hamster.width < GROUND_WIDTH) {
-			//grabbed = true;
-			state = State::Hawked;
-		}
+		if(level >= 4){
+			if (hawk.transform.position.y > 60.0f) {
+				hawk.velocity.y = -10.0f;
+				hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
+			}
+			if (hawk.transform.position.y < -60.0f) {
+				hawk.velocity.y = 10.0f;
+				hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
+			}
+			if (abs(hawk.transform.position.x - hamster.transform.position.x) < 2.0f && abs(hawk.transform.position.y - hamster.transform.position.y) < 2.0f &&
+				abs(hamster.transform.position.x) - 2.0f * hamster.length < GROUND_LENGTH &&
+				abs(hamster.transform.position.y) - 2.0f * hamster.width < GROUND_WIDTH) {
+				//grabbed = true;
+				state = State::Hawked;
+			}
 
-		if (state == State::Hawked) {
-			hamster.velocity = hawk.velocity;
-			
+			if (state == State::Hawked) {
+				hamster.velocity = hawk.velocity;
+			}
 		}
 
 		hawk.transform.position += elapsed*hawk.velocity;
