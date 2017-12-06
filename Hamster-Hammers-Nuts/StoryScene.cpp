@@ -207,7 +207,7 @@ namespace Hamster
 		}
 		
 		//if (score >= max_score && !on_ladder)
-		if (score >= max_score && (state != State::OnLadder0 && state != State::OnLadder1))
+		if (score >= max_score && state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
 		{
 			ladder.velocity.z = -20.0f;
 			if (ladder.transform.position.z <= 20.0f)
@@ -229,13 +229,12 @@ namespace Hamster
 
 		// 
 		//if (x1 > GROUND_LENGTH - hamster.length && stun == 0.0f && !swinging && ladder.transform.position.z == 20.0f)
-		if (x1 > GROUND_LENGTH - hamster.length && state == State::Idle && ladder.transform.position.z == 20.0f)
+		if (x1 > GROUND_LENGTH - hamster.length && state <= State::Walking && ladder.transform.position.z == 20.0f)
 		{
 			if (score >= max_score && abs(hamster.transform.position.y) <= 2.0f && 
 				(direction == Direction::Up || direction == Direction::LeftUp || direction == Direction::RightUp))
 			{
 				state = State::OnLadder0;
-				//hamster.anim.Play(TOC::HAMSTER_CLIMB_ANIM);
 				hamster.anim.Play(TOC::HAMSTER_TOCLIMB_ANIM, false);
 				score = 0;
 				hamster.velocity.x = 0.0f;
@@ -243,6 +242,13 @@ namespace Hamster
 				//hamster.velocity.z = 5.0f;
 				hamster.velocity.z = 0.0f;
 			}
+		}
+		if (state == State::OnLadder0 && hamster.anim.state == AnimationState::FINISHED) {
+			hamster.anim.Play(TOC::HAMSTER_CLIMB_ANIM);
+			state = State::OnLadder1;
+			hamster.velocity.x = 0.0f;
+			hamster.velocity.y = 0.0f;
+			hamster.velocity.z = 5.0f;
 		}
 
 		if (abs(hamster.transform.position.x) - 2.0f * hamster.length > GROUND_LENGTH || 
@@ -273,66 +279,68 @@ namespace Hamster
 		//	if (stun < 0.0f)
 		//		stun = 0.0f;
 		//}
-		for (auto log : logs)
-		{
-			if (abs(log->transform.position.z + elapsed * log->velocity.z - z1) <= hamster.height + log->height && 
-				log->transform.position.z > log->height && 
-				log->velocity.z < 0.0f)
+		if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2) {
+			for (auto log : logs)
 			{
-				if (abs(log->transform.position.x - hamster.transform.position.x) < hamster.length + log->length &&
-					abs(log->transform.position.y - hamster.transform.position.y) < hamster.width + log->width)
+				if (abs(log->transform.position.z + elapsed * log->velocity.z - z1) <= hamster.height + log->height &&
+					log->transform.position.z > log->height &&
+					log->velocity.z < 0.0f)
 				{
-					state = State::Stunned;
-					stun = 1.0f;
-					hamster.velocity.x = 10.0f;
-					hamster.velocity.y = 10.0f;
-					if (log->transform.position.y - hamster.transform.position.y > 0.0f)
-						hamster.velocity.y = -10.0;
-					if (log->transform.position.x - hamster.transform.position.x > 0.0f)
-						hamster.velocity.x = -10.0f;
-					if (score > 0)
-						score--;
-					break;
+					if (abs(log->transform.position.x - hamster.transform.position.x) < hamster.length + log->length &&
+						abs(log->transform.position.y - hamster.transform.position.y) < hamster.width + log->width)
+					{
+						state = State::Stunned;
+						stun = 1.0f;
+						hamster.velocity.x = 10.0f;
+						hamster.velocity.y = 10.0f;
+						if (log->transform.position.y - hamster.transform.position.y > 0.0f)
+							hamster.velocity.y = -10.0;
+						if (log->transform.position.x - hamster.transform.position.x > 0.0f)
+							hamster.velocity.x = -10.0f;
+						if (score > 0)
+							score--;
+						break;
+					}
 				}
 			}
-		}
-		for (auto nut : nuts)
-		{
-			if (abs(abs(nut->transform.position.z + elapsed * nut->velocity.z - z1) - hamster.height - nut->height) < 0.25f &&
-				nut->transform.position.z > nut->height && nut->velocity.z < 0.0f)
+			for (auto nut : nuts)
 			{
-				if (abs(nut->transform.position.x - hamster.transform.position.x) < hamster.length + nut->length &&
-					abs(nut->transform.position.y - hamster.transform.position.y) < hamster.width + nut->width)
+				if (abs(abs(nut->transform.position.z + elapsed * nut->velocity.z - z1) - hamster.height - nut->height) < 0.25f &&
+					nut->transform.position.z > nut->height && nut->velocity.z < 0.0f)
 				{
-					state = State::Stunned;
-					stun = 1.0f;
-					hamster.velocity.x = 10.0f;
-					hamster.velocity.y = 10.0f;
-					if (nut->transform.position.y - hamster.transform.position.y > 0.0f)
-						hamster.velocity.y = -10.0;
-					if (nut->transform.position.x - hamster.transform.position.x > 0.0f)
-						hamster.velocity.x = -10.0f;
-					if (score > 0)
-						score--;
-					break;
+					if (abs(nut->transform.position.x - hamster.transform.position.x) < hamster.length + nut->length &&
+						abs(nut->transform.position.y - hamster.transform.position.y) < hamster.width + nut->width)
+					{
+						state = State::Stunned;
+						stun = 1.0f;
+						hamster.velocity.x = 10.0f;
+						hamster.velocity.y = 10.0f;
+						if (nut->transform.position.y - hamster.transform.position.y > 0.0f)
+							hamster.velocity.y = -10.0;
+						if (nut->transform.position.x - hamster.transform.position.x > 0.0f)
+							hamster.velocity.x = -10.0f;
+						if (score > 0)
+							score--;
+						break;
+					}
 				}
 			}
-		}
-		for (auto log : logs) {
-			if (abs(log->transform.position.z - z1) <= hamster.height + log->height && state != State::Stunned) {
-				if (abs(log->transform.position.x - x1) < hamster.length + log->length && abs(log->transform.position.y - y1) < hamster.width + log->width) {
-					hamster.velocity.x = 0.0f;
-					hamster.velocity.y = log->velocity.y;
+			for (auto log : logs) {
+				if (abs(log->transform.position.z - z1) <= hamster.height + log->height && state != State::Stunned) {
+					if (abs(log->transform.position.x - x1) < hamster.length + log->length && abs(log->transform.position.y - y1) < hamster.width + log->width) {
+						hamster.velocity.x = 0.0f;
+						hamster.velocity.y = log->velocity.y;
+					}
 				}
-			}
-			if (abs(log->transform.position.z - z1) <= hamster.height + log->height && state == State::Stunned) {
-				if (abs(log->transform.position.x - x1) < hamster.length + log->length && abs(log->transform.position.y - y1) < hamster.width + log->width) {
-					hamster.velocity.x = 10.0f;
-					hamster.velocity.y = 10.0f;
-					if (log->transform.position.y - hamster.transform.position.y > 0.0f)
-						hamster.velocity.y = -10.0f;
-					if (log->transform.position.x - hamster.transform.position.x > 0.0f)
-						hamster.velocity.x = -10.0f;
+				if (abs(log->transform.position.z - z1) <= hamster.height + log->height && state == State::Stunned) {
+					if (abs(log->transform.position.x - x1) < hamster.length + log->length && abs(log->transform.position.y - y1) < hamster.width + log->width) {
+						hamster.velocity.x = 10.0f;
+						hamster.velocity.y = 10.0f;
+						if (log->transform.position.y - hamster.transform.position.y > 0.0f)
+							hamster.velocity.y = -10.0f;
+						if (log->transform.position.x - hamster.transform.position.x > 0.0f)
+							hamster.velocity.x = -10.0f;
+					}
 				}
 			}
 		}
@@ -406,7 +414,7 @@ namespace Hamster
 			}
 			if (abs(log->transform.position.x) - log->length < GROUND_LENGTH && abs(log->transform.position.y) - log->width < GROUND_WIDTH) {
 				if (log->transform.position.z <= log->height && log->velocity.z < 0.0f) {
-					log->velocity.z = -log->velocity.z / 2.0f;
+					log->velocity.z = -log->velocity.z / 4.0f;
 					if (abs(log->velocity.z) < 1.0f) {
 						log->transform.position.z = log->height;
 						log->velocity.z = 0.0f;
@@ -428,7 +436,7 @@ namespace Hamster
 			}
 			if (abs(nut->transform.position.x) - nut->length < GROUND_LENGTH && abs(nut->transform.position.y) - nut->width < GROUND_WIDTH) {
 				if (nut->transform.position.z <= nut->height && nut->velocity.z < 0.0f) {
-					nut->velocity.z = -nut->velocity.z / 2.0f;
+					nut->velocity.z = -nut->velocity.z / 4.0f;
 					if (abs(nut->velocity.z) < 1.0f) {
 						nut->transform.position.z = nut->height;
 						nut->velocity.z = 0.0f;
@@ -484,7 +492,7 @@ namespace Hamster
 		//if(!on_ladder)
 		hawk.transform.position += elapsed*hawk.velocity;
 		hamster.transform.position += elapsed*hamster.velocity;
-		if (hamster.transform.position.z > 50.0f && hamster.velocity.z > 0.0f && state == State::OnLadder1)
+		if (hamster.transform.position.z > DROP_HEIGHT && hamster.velocity.z > 0.0f && state == State::OnLadder1)
 		{
 			logs.clear();
 			nuts.clear();
@@ -492,7 +500,7 @@ namespace Hamster
 			ladder.transform.position = glm::vec3(-GROUND_LENGTH, 0.0f, -20.0f);
 			hamster.transform.position.x = -GROUND_LENGTH - hamster.length;
 			hamster.transform.position.z = -20.0f;
-			state = State::OnLadder1;
+			state = State::OnLadder2;
 		}
 		if (hamster.transform.position.z < -30.0f && state == State::Falling0 && hamster.velocity.z < 0.0f) {
 			logs.clear();
@@ -532,7 +540,7 @@ namespace Hamster
 			}
 			hawk.transform.position.y = 100.0f;
 		}
-		if(state != State::OnLadder0 && state != State::OnLadder1)
+		if(state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
 			ladder.transform.position.z += ladder.velocity.z*elapsed;
 		for (auto nut : nuts) {
 			nut->transform.position += nut->velocity*elapsed;
@@ -610,7 +618,7 @@ namespace Hamster
 			state = State::Idle;
 			//swinging = false;
 		}
-		if (state != State::OnLadder0 && state != State::OnLadder1)
+		if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
 			RotateDirection(&hamster, direction);
 		
 		return true;
