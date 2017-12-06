@@ -17,7 +17,7 @@ namespace Hamster
 		LeftDown,
 		LeftUp,
 		RightDown,
-		RightUp,
+		RightUp
 	};
 
 	class Scene
@@ -59,7 +59,7 @@ namespace Hamster
 	private:
 		int level = 2;
 		bool grabbed = false;
-		float speed = 15.0f;
+		float speed = 7.5f;
 		Object hamster;
 		Object ground;
 		Object ladder;

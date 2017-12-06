@@ -22,6 +22,12 @@ vec3 textureNormal(sampler2D sampler, vec2 uv)
 	return 2.0 * texture(sampler, uv).xyz - vec3(1.0, 1.0, 1.0);
 }
 
+//void main()
+//{
+//	fragColor = vec4(vec3(texture(depthmap, uv).r), 1.0);
+//}
+
+// http://stylized.realtimerendering.com/
 void main()
 {
 	float centerDepth = texture(depthmap, uv).r;
@@ -108,36 +114,4 @@ void main()
 	vec4 color = texture(diffusemap, uv);
 	float intensity = min(coeff, coeffN);
 	fragColor = vec4(color.xyz * intensity, color.w);
-
-	/*
-	// arbitrary
-	vec3 t = center - top;
-	vec3 r = center - right;
-	vec3 tr = center - topright;
-	
-	t = abs(t);
-	r = abs(r);
-	tr = abs(tr);
-	
-	float n = 0.0;
-	n = max(n, t.x);
-	n = max(n, t.y);
-	n = max(n, t.z);
-	n = max(n, r.x);
-	n = max(n, r.y);
-	n = max(n, r.z);
-	n = max(n, tr.x);
-	n = max(n, tr.y);
-	n = max(n, tr.z);
-	
-	// threshold and scale
-	n = 1.0 - clamp(clamp((n * 2.0) - 0.8, 0.0, 1.0) * 1.5, 0.0, 1.0);
-	
-	vec4 color = texture(diffusemap, uv);
-	//fragColor = vec4(color.xyz * (0.1 + 0.9 * n), color.w);
-	//fragColor = vec4(color.xyz * n, color.w);
-	//n = 500.0;
-	float m = min(coeff, n);
-	fragColor = vec4(color.xyz * coeff, color.w);
-	*/
 }

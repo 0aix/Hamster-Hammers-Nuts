@@ -70,7 +70,7 @@ namespace Hamster
 		hamster.animated = true;
 		direction = Direction::Down;
 
-		ground.mesh = Mesh(TOC::GROUND_MESH);
+		ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
 		ground.transform.scale = glm::vec3(0.5f);
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
@@ -486,10 +486,11 @@ namespace Hamster
 			//grabbed = true;
 			state = State::Hawked;
 		}
+
 		if (state == State::Hawked) {
 			hamster.velocity = hawk.velocity;
 		}
-		//if(!on_ladder)
+
 		hawk.transform.position += elapsed*hawk.velocity;
 		hamster.transform.position += elapsed*hamster.velocity;
 		if (hamster.transform.position.z > DROP_HEIGHT && hamster.velocity.z > 0.0f && state == State::OnLadder1)
@@ -550,6 +551,7 @@ namespace Hamster
 		}
 
 		if (state == State::Swinging && hamster.anim.frame_number == 15) {
+
 			for (auto it = nuts.begin(); it != nuts.end(); it++) {
 				auto nut = *it;
 				if (nut->velocity.z == 0.0f) {
@@ -620,7 +622,6 @@ namespace Hamster
 		}
 		if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
 			RotateDirection(&hamster, direction);
-		
 		return true;
 	}
 
@@ -634,6 +635,7 @@ namespace Hamster
 
 		// compute model view projection from the light's point of view
 		glm::mat4 light_projection = glm::ortho<float>(-32.0f, 32.0f, -32.0f, 32.0f, 0.0f, 100.0f);
+		//glm::mat4 light_projection = glm::ortho<float>(-16.0f, 16.0f, -16.0f, 16.0f, 0.0f, 100.0f);
 		glm::mat4 light_view = glm::lookAt(50.0f * light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 world_to_light = light_projection * light_view;
 
@@ -667,6 +669,11 @@ namespace Hamster
 
 		// ui
 		//Graphics::UI(); / Graphics::Basic() / ::Draw()
+
+		// sprite test
+		//Graphics::BeginSprite();
+		//Graphics::RenderSprite(TOC::SNOW_PNG, glm::vec2(0.5f, 0.5f), glm::vec2(0.2f, 0.2f));
+		//Graphics::RenderSprite(TOC::SNOW_PNG, glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f));
 
 		Graphics::Present();
 	}

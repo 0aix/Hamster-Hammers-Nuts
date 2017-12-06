@@ -20,9 +20,8 @@ namespace Hamster
 		hamster.anim.mesh.emplace_back(TOC::HAMSTER_BODY_MESH);
 		hamster.anim.mesh.emplace_back(TOC::HAMSTER_EYES_MESH);
 		hamster.animated = true;
-		direction = Direction::Down;
 
-		AddObject("Ground", TOC::GROUND_PROTO_MESH, glm::vec3(0.0f, 0.0f, 0.0f));
+		AddObject("Ground", TOC::GROUND_SPRING_MESH, glm::vec3(0.0f, 0.0f, 0.0f));
 		AddObject("BackWall", TOC::WALL_PROTO_MESH, glm::vec3(30.0f, 0.0f, 20.0f));
 		AddObject("FrontWall", TOC::WALL_PROTO_MESH, glm::vec3(-30.0f, 0.0f, -20.0f));
 
