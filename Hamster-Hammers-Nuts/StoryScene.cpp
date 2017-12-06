@@ -501,7 +501,6 @@ namespace Hamster
 		for (auto log : logs) {
 			log->transform.position += log->velocity*elapsed;
 		}
-
 		if (state == State::Swinging && hamster.anim.state == AnimationState::FINISHED)
 		{
 			state = State::Swinging;
@@ -552,7 +551,7 @@ namespace Hamster
 		glm::vec3 to_light = glm::normalize(glm::mat3(world_to_camera) * light_pos);
 
 		// compute model view projection from the light's point of view
-		glm::mat4 light_projection = glm::ortho<float>(-32.0f, 32.0f, -32.0f, 32.0f, 0.0f, 100.0f);
+		glm::mat4 light_projection = glm::ortho<float>(-16.0f, 16.0f, -16.0f, 16.0f, 0.0f, 100.0f);
 		glm::mat4 light_view = glm::lookAt(50.0f * light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 world_to_light = light_projection * light_view;
 

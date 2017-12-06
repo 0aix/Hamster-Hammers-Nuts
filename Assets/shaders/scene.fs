@@ -35,6 +35,7 @@ float random(vec3 seed, int i)
 	return fract(sin(dot_product) * 43758.5453);
 }
 
+// http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 void main()
 {
 	vec3 norm = normalize(normal);

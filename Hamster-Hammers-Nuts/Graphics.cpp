@@ -12,6 +12,20 @@ namespace Hamster
 {
 	namespace Graphics
 	{
+		struct Vert
+		{
+			Vert(glm::vec2& Position, glm::vec2& TexCoord, glm::vec4& Color) : Position(Position), TexCoord(TexCoord), Color(Color) {}
+			glm::vec2 Position;
+			glm::vec2 TexCoord;
+			glm::vec4 Color;
+		};
+
+		struct
+		{
+			int width;
+			int height;
+		} viewport;
+
 		SDL_Window* window;
 		SDL_GLContext context;
 
@@ -22,25 +36,22 @@ namespace Hamster
 		GLuint sprite;
 
 		GLuint shadowbuffer;
-		GLuint shadowmap; // RESERVED TEXTURE0
+		GLuint shadowmap;
 
 		GLuint scenebuffer;
-		GLuint diffusemap; // RESERVED TEXTURE1
-		GLuint normalmap; // RESERVED TEXTURE2
-		GLuint depthmap; // RESERVED TEXTURE3
+		GLuint diffusemap;
+		GLuint normalmap;
+		GLuint depthmap;
+
+		GLuint spritebuffer;
 
 		GLuint vao;
 		GLuint compvao;
+		GLuint spritevao;
 
 		glm::mat4 m_world_to_camera;
 		glm::mat4 m_world_to_clip;
 		glm::mat4 m_world_to_light;
-
-		struct
-		{
-			int width;
-			int height;
-		} viewport;
 
 		// modified https://github.com/opengl-tutorials/ogl/tree/master/common/shader.cpp
 		GLuint LoadShaders(char* vertex_file_path, char* fragment_file_path);
@@ -104,6 +115,7 @@ namespace Hamster
 			composite = LoadShaders("shaders\\composite.vs", "shaders\\composite.fs");
 			sprite = LoadShaders("shaders\\sprite.vs", "shaders\\sprite.fs");
 
+			// some code from http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 			// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 			glGenFramebuffers(1, &shadowbuffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, shadowbuffer);
@@ -127,6 +139,7 @@ namespace Hamster
 			if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
 				return false;
 			
+			// Scene stuff
 			glGenFramebuffers(1, &scenebuffer);
 			glBindFramebuffer(GL_FRAMEBUFFER, scenebuffer);
 			
@@ -172,6 +185,7 @@ namespace Hamster
 				1.0f, 1.0f
 			};
 
+			// Composite stuff
 			GLuint buffer;
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
@@ -181,6 +195,17 @@ namespace Hamster
 			glBindVertexArray(compvao);
 			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 			glEnableVertexAttribArray(0);
+
+			// Sprite stuff
+			glGenBuffers(1, &spritebuffer);
+			glGenVertexArrays(1, &spritevao);
+			glBindVertexArray(spritevao);
+			glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), 0);
+			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLbyte*)8);
+			glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vert), (GLbyte*)16);
+			glEnableVertexAttribArray(0);
+			glEnableVertexAttribArray(1);
+			glEnableVertexAttribArray(2);
 
 			// Enable/set some GL defaults
 			glEnable(GL_DEPTH_TEST);
@@ -406,6 +431,33 @@ namespace Hamster
 			glUniform1i(m_diffusemap, 0);
 			glUniform1i(m_normalmap, 1);
 			glUniform1i(m_depthmap, 2);
+			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		}
+
+		void BeginSprite()
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			glClear(GL_DEPTH_BUFFER_BIT);
+			glViewport(0, 0, viewport.width, viewport.height);
+			glUseProgram(sprite);
+			glBindBuffer(GL_ARRAY_BUFFER, spritebuffer);
+			glBindVertexArray(spritevao);
+		}
+
+		void RenderSprite(unsigned int textureID, glm::vec2& center, glm::vec2& size, glm::vec4& color)
+		{
+			static GLint sprite_tex = glGetUniformLocation(sprite, "tex");
+			Vert vertices[4] =
+			{
+				{ glm::vec2(center.x - 0.5 * size.x, center.y + 0.5 * size.y), glm::vec2(0.0f, 1.0f), color },
+				{ glm::vec2(center.x + 0.5 * size.x, center.y + 0.5 * size.y), glm::vec2(1.0f, 1.0f), color },
+				{ glm::vec2(center.x - 0.5 * size.x, center.y - 0.5 * size.y), glm::vec2(0.0f, 0.0f), color },
+				{ glm::vec2(center.x + 0.5 * size.x, center.y - 0.5 * size.y), glm::vec2(1.0f, 0.0f), color }
+			};
+			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, Assets::textures[textureID]);
+			glUniform1i(sprite_tex, 0);
 			glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		}
 

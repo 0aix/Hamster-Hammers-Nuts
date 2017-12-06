@@ -27,9 +27,9 @@ namespace Hamster
 	struct Animation
 	{
 		Animation() {};
-		Animation(unsigned int sknID, unsigned int animID, bool repeat = true);
+		Animation(unsigned int sknID, unsigned int animID, bool repeat = true, float factor = 1.0f);
 
-		void Play(unsigned int animID, bool repeat = true, bool cont = true);
+		void Play(unsigned int animID, bool repeat = true, bool cont = true, float factor = 1.0f);
 		void Update(float elapsed);
 
 		// Meshes
@@ -44,6 +44,7 @@ namespace Hamster
 		int frame_count;
 		int frame_number;
 		float frame_time;
+		float elapsed_factor;
 
 		std::vector<glm::mat4x3> bone_to_world;
 		std::vector<glm::mat4x3> bind_to_world;
