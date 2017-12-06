@@ -8,9 +8,7 @@ namespace Hamster
 		aspect = 4.0f / 3.0f;
 		near = 0.1f;
 		far = 1000.0f;
-		//scale = 22.5f;
-		//scale = 25.0f;
-		scale = 11.25f; // -> 12.5f
+		scale = 12.5f;
 	}
 
 	void Camera::set(float radius, float elevation, float azimuth, glm::vec3& target)
