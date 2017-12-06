@@ -388,7 +388,9 @@ namespace Hamster
 			glUniformMatrix4fv(scene_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 			glUniformMatrix4fv(scene_depth_bias_mvp, 1, GL_FALSE, glm::value_ptr(depth_bias_mvp));
 			glUniform1f(scene_alpha, alpha);
-			glEnable(GL_CULL_FACE);
+
+			if (alpha < 1.0f)
+				glEnable(GL_CULL_FACE);
 
 			if (object.animated)
 			{
@@ -408,7 +410,8 @@ namespace Hamster
 				glUniform1i(scene_animated, 0);
 				glDrawArrays(GL_TRIANGLES, object.mesh.vertex_start, object.mesh.vertex_count);
 			}
-			glDisable(GL_CULL_FACE);
+			if (alpha < 1.0f)
+				glDisable(GL_CULL_FACE);
 		}
 
 		void CompositeScene()
@@ -419,8 +422,7 @@ namespace Hamster
 
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glViewport(0, 0, viewport.width, viewport.height);
-			glClearColor(176.0f / 255.0f, 226.0f / 255.0f, 1.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glClear(GL_DEPTH_BUFFER_BIT);
 			glUseProgram(composite);
 			glBindVertexArray(compvao);
 			glActiveTexture(GL_TEXTURE0);

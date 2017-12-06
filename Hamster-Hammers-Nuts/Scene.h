@@ -106,5 +106,7 @@ namespace Hamster
 		void Render();
 
 	private:
+		int selection;
+		bool howtoplay;
 	};
 }
