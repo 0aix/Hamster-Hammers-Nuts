@@ -70,7 +70,7 @@ namespace Hamster
 		hamster.animated = true;
 		direction = Direction::Down;
 
-		ground.mesh = Mesh(TOC::GROUND_MESH);
+		ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
 		ground.transform.scale = glm::vec3(0.5f);
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
@@ -626,8 +626,8 @@ namespace Hamster
 		glm::vec3 to_light = glm::normalize(glm::mat3(world_to_camera) * light_pos);
 
 		// compute model view projection from the light's point of view
-		//glm::mat4 light_projection = glm::ortho<float>(-32.0f, 32.0f, -32.0f, 32.0f, 0.0f, 100.0f);
-		glm::mat4 light_projection = glm::ortho<float>(-16.0f, 16.0f, -16.0f, 16.0f, 0.0f, 100.0f);
+		glm::mat4 light_projection = glm::ortho<float>(-32.0f, 32.0f, -32.0f, 32.0f, 0.0f, 100.0f);
+		//glm::mat4 light_projection = glm::ortho<float>(-16.0f, 16.0f, -16.0f, 16.0f, 0.0f, 100.0f);
 		glm::mat4 light_view = glm::lookAt(50.0f * light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 world_to_light = light_projection * light_view;
 
@@ -636,26 +636,26 @@ namespace Hamster
 
 		// shadow map
 		Graphics::BeginShadow();
-		//for (auto it = objects.begin(); it != objects.end(); it++)
-		//	Graphics::RenderShadow(*it);
-		//for (auto it = nuts.begin(); it != nuts.end(); it++)
-		//	Graphics::RenderShadow(**it);
-		//for (auto it = logs.begin(); it != logs.end(); it++)
-		//	Graphics::RenderShadow(**it);
-		//Graphics::RenderShadow(hamster);
+		for (auto it = objects.begin(); it != objects.end(); it++)
+			Graphics::RenderShadow(*it);
+		for (auto it = nuts.begin(); it != nuts.end(); it++)
+			Graphics::RenderShadow(**it);
+		for (auto it = logs.begin(); it != logs.end(); it++)
+			Graphics::RenderShadow(**it);
+		Graphics::RenderShadow(hamster);
 		//Graphics::RenderShadow(hawk);
 
 		// scene
 		Graphics::BeginScene(to_light);
-		//for (auto it = objects.begin(); it != objects.end(); it++)
-		//	Graphics::RenderScene(*it);
-		//for (auto it = nuts.begin(); it != nuts.end(); it++)
-		//	Graphics::RenderScene(**it);
-		//for (auto it = logs.begin(); it != logs.end(); it++)
-		//	Graphics::RenderScene(**it);
-		//Graphics::RenderScene(hamster);
+		for (auto it = objects.begin(); it != objects.end(); it++)
+			Graphics::RenderScene(*it);
+		for (auto it = nuts.begin(); it != nuts.end(); it++)
+			Graphics::RenderScene(**it);
+		for (auto it = logs.begin(); it != logs.end(); it++)
+			Graphics::RenderScene(**it);
+		Graphics::RenderScene(hamster);
 		Graphics::RenderScene(ground);
-		//Graphics::RenderScene(ladder);
+		Graphics::RenderScene(ladder);
 		//Graphics::RenderScene(hawk);
 		Graphics::CompositeScene();
 

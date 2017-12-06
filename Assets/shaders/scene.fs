@@ -6,7 +6,7 @@ in vec3 color;
 in vec4 shadow;
 
 layout(location = 0) out vec4 fragColor;
-layout(location = 1) out vec3 normalColor;
+layout(location = 1) out vec4 normalColor;
 
 uniform vec3 to_light;
 uniform sampler2DShadow shadowmap;
@@ -68,5 +68,5 @@ void main()
 	fragColor = vec4(ambient + 0.5 * coeff * color, 1.0);
 	//fragColor = vec4(ambient + 0.5f * visibility * color * (smoothstep(0.0, 0.1, nl) * 0.6 + 0.4), 1.0);
 
-	normalColor = (norm + vec3(1.0, 1.0, 1.0)) * 0.5;
+	normalColor = vec4((norm + vec3(1.0, 1.0, 1.0)) * 0.5, 1.0);
 }
