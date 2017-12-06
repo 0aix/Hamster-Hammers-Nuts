@@ -80,12 +80,13 @@ namespace Hamster
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
 
-		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
+		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_FLAP_ANIM);
+		//hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
 		hawk.anim.mesh.emplace_back(TOC::ARMATURE_BODY_MESH);
 		hawk.animated = true;
-		hawk.transform.scale = glm::vec3(4.0f);
+		hawk.transform.scale = glm::vec3(2.0f);
 		
-		hawk.transform.position = glm::vec3(0.0f,70.0f,4.0f);
+		hawk.transform.position = glm::vec3(0.0f,0.0f,4.0f);
 		hawk.height = 3.0f;
 		hawk.length = 2.0f;
 		hawk.width = 4.0f;
@@ -345,10 +346,8 @@ namespace Hamster
 		}
 
 		// Update object animations
-		//for (auto it = objects.begin(); it != objects.end(); it++)
-		//	if (it->animated)
-		//		it->anim.Update(elapsed);
 		hamster.anim.Update(elapsed);
+		hawk.anim.Update(elapsed);
 
 		//if (!swinging)
 		//if (state != State::Swinging)
@@ -504,7 +503,7 @@ namespace Hamster
 		if (hamster.transform.position.z < -30.0f && state == State::Falling0 && hamster.velocity.z < 0.0f) {
 			logs.clear();
 			nuts.clear();
-			score = std::min(0,score-5);
+			score = std::max(0, score - 5);
 			ladder.transform.position = glm::vec3(GROUND_LENGTH, 0.0f, 50.0f);
 			if (abs(hamster.transform.position.x) + hamster.length > GROUND_LENGTH) {
 				hamster.transform.position.x *= -0.7f;
@@ -626,7 +625,7 @@ namespace Hamster
 		else {
 			RotateDirection(&hawk, Direction::Left);
 		}
-		RotateObject(&hawk, -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
+		RotateObject(&hawk, -0.5f * M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
 		return true;
 	}
 
