@@ -21,7 +21,7 @@ namespace Hamster
 		void RenderShadow(const Object& object);
 
 		void BeginScene(glm::vec3& to_light);
-		void RenderScene(const Object& object);
+		void RenderScene(const Object& object, float alpha = 1.0f);
 		void CompositeScene();
 
 		void BeginSprite();

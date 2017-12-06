@@ -123,7 +123,7 @@ namespace Hamster
 			// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
 			glGenTextures(1, &shadowmap);
 			glBindTexture(GL_TEXTURE_2D, shadowmap);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -362,9 +362,10 @@ namespace Hamster
 			glBindTexture(GL_TEXTURE_2D, shadowmap);
 			glUniform1i(scene_shadowmap, 0);
 			glUniform3fv(scene_to_light, 1, glm::value_ptr(to_light));
+			glCullFace(GL_BACK);
 		}
 
-		void RenderScene(const Object& object)
+		void RenderScene(const Object& object, float alpha)
 		{
 			static glm::mat4 bias(0.5f, 0.0f, 0.0f, 0.0f,
 								  0.0f, 0.5f, 0.0f, 0.0f,
@@ -375,6 +376,7 @@ namespace Hamster
 			static GLint scene_bones = glGetUniformLocation(scene, "bones");
 			static GLint scene_itmv = glGetUniformLocation(scene, "itmv");
 			static GLint scene_animated = glGetUniformLocation(scene, "animated");
+			static GLint scene_alpha = glGetUniformLocation(scene, "alpha");
 
 			// compute model + view + projection (object space to clip space) matrix
 			glm::mat4 local_to_world = object.transform.make_local_to_world();
@@ -385,6 +387,8 @@ namespace Hamster
 
 			glUniformMatrix4fv(scene_mvp, 1, GL_FALSE, glm::value_ptr(mvp));
 			glUniformMatrix4fv(scene_depth_bias_mvp, 1, GL_FALSE, glm::value_ptr(depth_bias_mvp));
+			glUniform1f(scene_alpha, alpha);
+			glEnable(GL_CULL_FACE);
 
 			if (object.animated)
 			{
@@ -404,6 +408,7 @@ namespace Hamster
 				glUniform1i(scene_animated, 0);
 				glDrawArrays(GL_TRIANGLES, object.mesh.vertex_start, object.mesh.vertex_count);
 			}
+			glDisable(GL_CULL_FACE);
 		}
 
 		void CompositeScene()

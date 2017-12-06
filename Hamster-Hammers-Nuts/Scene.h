@@ -60,6 +60,7 @@ namespace Hamster
 		int level = 1;
 		float speed = 7.5f;
 		Object hamster;
+		Object target;
 		Object ground;
 		Object ladder;
 		Object hawk;
