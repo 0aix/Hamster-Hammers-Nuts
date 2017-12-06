@@ -49,9 +49,9 @@ void main()
 
 	for (int i = 0; i < 16; i++)
 	{
-		//int index = i;
+		int index = i;
 		//int index = int(16.0f * random(gl_FragCoord.xyy, i)) % 16;
-		int index = int(16.0f * random(floor(position.xyz * 1000.0f), i)) % 16;
+		//int index = int(16.0f * random(floor(position.xyz * 1000.0f), i)) % 16;
 		visibility -= 0.05f * (1.0f - texture(shadowmap, vec3(shadow.xy + poisson_disk[index] / 1200.0, (shadow.z - bias) / shadow.w)));
 	}
 

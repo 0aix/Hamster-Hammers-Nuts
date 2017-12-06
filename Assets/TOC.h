@@ -4,7 +4,7 @@ namespace Hamster
 {
 	namespace TOC
 	{
-		const unsigned int VERSION = 736313090;
+		const unsigned int VERSION = 661748045;
 		const unsigned int ARMATURE_BODY_MESH = 0;
 		const unsigned int CIRCLE_MESH = 1;
 		const unsigned int CUBE_001_MESH = 2;
@@ -46,5 +46,9 @@ namespace Hamster
 		const unsigned int ICE_PNG = 7;
 		const unsigned int SKY_PNG = 8;
 		const unsigned int SNOW_PNG = 9;
+		const unsigned int C4_OGG = 0;
+		const unsigned int HB_OGG = 1;
+		const unsigned int HBB_OGG = 2;
+		const unsigned int HBM_OGG = 3;
 	}
 }

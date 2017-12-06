@@ -58,7 +58,7 @@ namespace Hamster
 
 		bool Initialize(char* name, int width, int height)
 		{
-			// Initialize SDL library:
+			// Initialize SDL library
 			SDL_Init(SDL_INIT_VIDEO);
 
 			// Ask for an OpenGL context version 3.3, core profile, and enable debugging
@@ -123,7 +123,7 @@ namespace Hamster
 			// Depth texture. Slower than a depth buffer, but you can sample it later in your shader
 			glGenTextures(1, &shadowmap);
 			glBindTexture(GL_TEXTURE_2D, shadowmap);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -317,7 +317,7 @@ namespace Hamster
 		void BeginShadow()
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, shadowbuffer);
-			glViewport(0, 0, 2048, 2048);
+			glViewport(0, 0, 1024, 1024);
 			glClear(GL_DEPTH_BUFFER_BIT);
 			glUseProgram(shadow);
 			glBindVertexArray(vao);

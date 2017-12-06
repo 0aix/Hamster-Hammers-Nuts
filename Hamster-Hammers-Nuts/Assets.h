@@ -29,9 +29,11 @@ namespace Hamster
 		extern Entry* meshes;
 		extern Entry* skeletons;
 		extern Entry* anims;
+		extern Entry* oggs;
 		extern Bone* bones;
 		extern PoseBone* posebones;
 		extern GLuint* textures;
+		extern char* oggbuffer;
 
 		bool LoadAssets(char* name);
 	}

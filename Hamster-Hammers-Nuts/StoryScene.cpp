@@ -235,11 +235,11 @@ namespace Hamster
 				(direction == Direction::Up || direction == Direction::LeftUp || direction == Direction::RightUp))
 			{
 				state = State::OnLadder0;
+				direction = Direction::Up;
 				hamster.anim.Play(TOC::HAMSTER_TOCLIMB_ANIM, false);
 				score = 0;
 				hamster.velocity.x = 0.0f;
 				hamster.velocity.y = 0.0f;
-				//hamster.velocity.z = 5.0f;
 				hamster.velocity.z = 0.0f;
 			}
 		}
@@ -269,6 +269,7 @@ namespace Hamster
 		if (state == State::Stunned)
 		{
 			stun -= elapsed;
+			RotateObject(&hamster, 540.0f * elapsed, glm::vec3(0.0f, 0.0f, 1.0f));
 			if (stun < 0.0f)
 				state = State::Idle;
 				//stun = 0.0f;
@@ -645,7 +646,8 @@ namespace Hamster
 			state = State::Idle;
 			//swinging = false;
 		}
-		if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
+		//if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
+		if (state != State::Stunned)
 			RotateDirection(&hamster, direction);
 		if (hawk.velocity.y < 0.0f) {
 			RotateDirection(&hawk, Direction::Right);
@@ -675,8 +677,6 @@ namespace Hamster
 
 		// shadow map
 		Graphics::BeginShadow();
-		for (auto it = objects.begin(); it != objects.end(); it++)
-			Graphics::RenderShadow(*it);
 		for (auto it = nuts.begin(); it != nuts.end(); it++)
 			Graphics::RenderShadow(**it);
 		for (auto it = logs.begin(); it != logs.end(); it++)
@@ -686,8 +686,6 @@ namespace Hamster
 
 		// scene
 		Graphics::BeginScene(to_light);
-		for (auto it = objects.begin(); it != objects.end(); it++)
-			Graphics::RenderScene(*it);
 		for (auto it = nuts.begin(); it != nuts.end(); it++)
 			Graphics::RenderScene(**it);
 		for (auto it = logs.begin(); it != logs.end(); it++)
@@ -725,7 +723,7 @@ namespace Hamster
 				target.transform.position = hamster.transform.position + glm::vec3(2.0f * 0.707107f, -2.0f * 0.707107f, 0.0f);
 				break;
 			}
-			Graphics::RenderScene(target, 0.7f);
+			Graphics::RenderScene(target, 0.75f);
 		}
 
 		// background
@@ -736,12 +734,29 @@ namespace Hamster
 		Graphics::CompositeScene();
 
 		// ui
-		//Graphics::UI(); / Graphics::Basic() / ::Draw()
+		Graphics::BeginSprite();
+		// draw acorn
+		// draw numbers depending on # of digits of max score
+		if (max_score < 10)
+		{
+			// draw first number
+			// draw /
+			// draw second number
+		}
+		else
+		{
+			// draw first number
+			if (score < 10) // draw 0
+			{
 
-		// sprite test
-		//Graphics::BeginSprite();
-		//Graphics::RenderSprite(TOC::SNOW_PNG, glm::vec2(0.5f, 0.5f), glm::vec2(0.2f, 0.2f));
-		//Graphics::RenderSprite(TOC::SNOW_PNG, glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f));
+			}
+			else
+			{
+
+			}
+			// draw /
+			// draw second number
+		}
 
 		Graphics::Present();
 	}

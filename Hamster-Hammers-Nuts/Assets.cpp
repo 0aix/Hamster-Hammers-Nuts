@@ -13,9 +13,11 @@ namespace Hamster
 		Entry* meshes;
 		Entry* skeletons;
 		Entry* anims;
+		Entry* oggs;
 		Bone* bones;
 		PoseBone* posebones;
 		GLuint* textures;
+		char* oggbuffer;
 
 		bool LoadAssets(char* name)
 		{
@@ -84,8 +86,14 @@ namespace Hamster
 			delete[] pngs;
 
 			// SOUND_BUFFER
+			ifs.read((char*)&size, 4);
+			oggbuffer = new char[size];
+			ifs.read(oggbuffer, size);
 
 			// SOUND
+			ifs.read((char*)&size, 4);
+			oggs = new Entry[size];
+			ifs.read((char*)oggs, size * sizeof(Entry));
 
 			ifs.close();
 			return true;
