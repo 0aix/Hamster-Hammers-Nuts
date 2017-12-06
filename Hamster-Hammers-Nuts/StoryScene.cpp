@@ -86,7 +86,7 @@ namespace Hamster
 		hawk.animated = true;
 		hawk.transform.scale = glm::vec3(2.0f);
 		
-		hawk.transform.position = glm::vec3(0.0f,0.0f,4.0f);
+		hawk.transform.position = glm::vec3(70.0f,0.0f,-3.0f);
 		hawk.height = 3.0f;
 		hawk.length = 2.0f;
 		hawk.width = 4.0f;
@@ -364,7 +364,7 @@ namespace Hamster
 		next_drop -= elapsed;
 		if (next_drop <= 0.0f) {
 			next_drop = drop_interval;
-			int drop_type = mt_rand() % level;
+			int drop_type = mt_rand() % (level/4+1);
 			glm::vec3 pos = 
 				glm::vec3((float)(mt_rand() % (2*(GROUND_LENGTH-3))) - ((float)GROUND_LENGTH - 3.0f), 
 				(float)(mt_rand() % (2 * (GROUND_WIDTH - 3))) - ((float)GROUND_WIDTH - 3.0f), 50.0f);
@@ -655,7 +655,6 @@ namespace Hamster
 		else {
 			RotateDirection(&hawk, Direction::Left);
 		}
-		RotateObject(&hawk, -0.5f * M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
 		return true;
 	}
 
