@@ -71,6 +71,9 @@ namespace Hamster
 		direction = Direction::Down;
 
 		ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
+		target.mesh = Mesh(TOC::CIRCLE_MESH);
+		target.transform.scale = glm::vec3(1.0f, 1.0f, 0.001f);
+
 		ground.transform.scale = glm::vec3(0.5f);
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
@@ -362,13 +365,6 @@ namespace Hamster
 		{
 			hamster.anim.Play(TOC::HAMSTER_WALK_ANIM);
 		}
-		//{
-		//	// this is wrong
-		//	if (hamster.velocity == glm::vec3(0.0f))
-		//		hamster.anim.Play(TOC::HAMSTER_STAND_ANIM);
-		//	else
-		//		hamster.anim.Play(TOC::HAMSTER_WALK_ANIM);
-		//}
 
 		next_drop -= elapsed;
 		if (next_drop <= 0.0f) {
@@ -648,8 +644,7 @@ namespace Hamster
 		glm::vec3 to_light = glm::normalize(glm::mat3(world_to_camera) * light_pos);
 
 		// compute model view projection from the light's point of view
-		glm::mat4 light_projection = glm::ortho<float>(-32.0f, 32.0f, -32.0f, 32.0f, 0.0f, 100.0f);
-		//glm::mat4 light_projection = glm::ortho<float>(-16.0f, 16.0f, -16.0f, 16.0f, 0.0f, 100.0f);
+		glm::mat4 light_projection = glm::ortho<float>(-17.0f, 17.0f, -17.0f, 17.0f, 0.0f, 100.0f);
 		glm::mat4 light_view = glm::lookAt(50.0f * light_pos, glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
 		glm::mat4 world_to_light = light_projection * light_view;
 
@@ -679,6 +674,37 @@ namespace Hamster
 		Graphics::RenderScene(ground);
 		Graphics::RenderScene(ladder);
 		Graphics::RenderScene(hawk);
+		if (state <= State::Swinging)
+		{
+			switch (direction)
+			{
+			case Direction::Left:
+				target.transform.position = hamster.transform.position + glm::vec3(0.0f, 2.0f, 0.0f);
+				break;
+			case Direction::Right:
+				target.transform.position = hamster.transform.position + glm::vec3(0.0f, -2.0f, 0.0f);
+				break;
+			case Direction::Down:
+				target.transform.position = hamster.transform.position + glm::vec3(-2.0f, 0.0f, 0.0f);
+				break;
+			case Direction::Up:
+				target.transform.position = hamster.transform.position + glm::vec3(2.0f, 0.0f, 0.0f);
+				break;
+			case Direction::LeftDown:
+				target.transform.position = hamster.transform.position + glm::vec3(-2.0f * 0.707107f, 2.0f * 0.707107f, 0.0f);
+				break;
+			case Direction::LeftUp:
+				target.transform.position = hamster.transform.position + glm::vec3(2.0f * 0.707107f, 2.0f * 0.707107f, 0.0f);
+				break;
+			case Direction::RightDown:
+				target.transform.position = hamster.transform.position + glm::vec3(-2.0f * 0.707107f, -2.0f * 0.707107f, 0.0f);
+				break;
+			case Direction::RightUp:
+				target.transform.position = hamster.transform.position + glm::vec3(2.0f * 0.707107f, -2.0f * 0.707107f, 0.0f);
+				break;
+			}
+			Graphics::RenderScene(target, 0.7f);
+		}
 		Graphics::CompositeScene();
 
 		// ui
