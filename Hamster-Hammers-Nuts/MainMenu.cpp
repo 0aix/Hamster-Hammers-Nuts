@@ -62,11 +62,25 @@ namespace Hamster
 
 		if (!howtoplay)
 		{
-			
+			// Draw title
+			// some array
+			switch (selection)
+			{
+			case 0:
+				break;
+			case 1:
+				break;
+			case 2:
+				break;
+			case 3:
+				break;
+			}
 		}
 		else
 		{
-
+			// Draw how to play title
+			// Draw instructions
+			// Draw
 		}
 	}
 }

@@ -112,7 +112,7 @@ void main()
 	float coeffN = clamp(1.0 - pow(clamp(n * 0.8, 0.0, 1.0), 2.0), 0.0, 1.0);
 
 	vec4 color = texture(diffusemap, uv);
-	//float intensity = min(coeff, coeffN);
-	float intensity = coeff;
+	float intensity = min(coeff, coeffN);
+	//float intensity = coeff;
 	fragColor = vec4(color.xyz * intensity, color.w);
 }

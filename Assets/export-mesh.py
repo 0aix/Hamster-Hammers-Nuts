@@ -47,6 +47,11 @@ def write_bone(bone):
 
 for arg in args:
 	bpy.ops.wm.open_mainfile(filepath=arg)
+
+	# test
+	for poly in bpy.context.object.data.polygons:
+		poly.use_smooth = True
+
 	armatures = dict()
 	for obj in bpy.data.objects:
 		#check if obj has a mesh

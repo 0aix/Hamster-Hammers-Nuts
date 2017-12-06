@@ -64,5 +64,8 @@ void main()
     else                       coeff = 0.25;
 	vec3 ambient = 0.7 * color;
 	fragColor = vec4(ambient + 0.5 * coeff * color, alpha);
-	normalColor = vec4((norm + vec3(1.0, 1.0, 1.0)) * 0.5, 1.0);
+	if (alpha == 1.0)
+		normalColor = vec4((norm + vec3(1.0, 1.0, 1.0)) * 0.5, 1.0);
+	else
+		normalColor = vec4(0.0);
 }
