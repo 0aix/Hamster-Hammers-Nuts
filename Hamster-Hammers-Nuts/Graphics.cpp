@@ -102,7 +102,7 @@ namespace Hamster
 			scene = LoadShaders("shaders\\scene.vs", "shaders\\scene.fs");
 			shadow = LoadShaders("shaders\\shadow.vs", "shaders\\shadow.fs");
 			composite = LoadShaders("shaders\\composite.vs", "shaders\\composite.fs");
-			sprite = LoadShaders("shaders\\sprite.vs", "shaders\\sprite.fs");
+			//sprite = LoadShaders("shaders\\sprite.vs", "shaders\\sprite.fs");
 
 			// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
 			glGenFramebuffers(1, &shadowbuffer);

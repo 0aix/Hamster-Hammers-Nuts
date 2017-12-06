@@ -17,7 +17,7 @@ namespace Hamster
 		LeftDown,
 		LeftUp,
 		RightDown,
-		RightUp
+		RightUp,
 	};
 
 	class Scene

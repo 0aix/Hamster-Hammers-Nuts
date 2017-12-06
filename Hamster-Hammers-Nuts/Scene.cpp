@@ -39,16 +39,33 @@ namespace Hamster
 
 	void Scene::RotateDirection(Object* obj, Direction direction)
 	{
-		auto quart = glm::quat(1.0f,0.0f,0.0f,0.0f);
-		float degrees;
-		if (direction == Direction::Up)
+		auto quart = glm::quat(1.0f, 0.0f, 0.0f, 0.0f);
+		float degrees = 0.0f;
+		if (direction == Direction::Up) {
 			degrees = 0.5f*M_PI;
-		else if (direction == Direction::Down)
+		}
+		else if (direction == Direction::Down) {
 			degrees = 1.5f*M_PI;
-		else if (direction == Direction::Left)
+		}
+		else if (direction == Direction::Left) {
 			degrees = M_PI;
-		else if (direction == Direction::Right)
+		}
+		else if (direction == Direction::Right){
 			degrees = 0.0f;
+		}
+		else if (direction == Direction::LeftUp) {
+			degrees = 0.75f*M_PI;
+		}
+		else if (direction == Direction::RightUp) {
+			degrees = 0.25f*M_PI;
+		}
+		else if (direction == Direction::LeftDown) {
+			degrees = 1.25f*M_PI;
+		}
+		else if (direction == Direction::RightDown) {
+			degrees = 1.75f*M_PI;
+		}
+
 		quart = glm::rotate(quart, degrees, glm::vec3(0.0f,0.0f,1.0f));
 		obj->transform.rotation = quart;
 	}
