@@ -76,8 +76,9 @@ namespace Hamster
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
 
 		hawk.mesh = Mesh(TOC::ARMATURE_SKN);
-		hawk.transform.scale = glm::vec3(2.0f);
-		hawk.transform.position = glm::vec3(0.0f,70.0f,5.0f);
+		hawk.transform.scale = glm::vec3(4.0f);
+		
+		hawk.transform.position = glm::vec3(0.0f,70.0f,3.0f);
 		hawk.height = 3.0f;
 		hawk.length = 2.0f;
 		hawk.width = 4.0f;
@@ -482,13 +483,16 @@ namespace Hamster
 			hawk.velocity.y = 10.0f;
 			hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
 		}
-		if (abs(hawk.transform.position.x - hamster.transform.position.x) < 2.0f && abs(hawk.transform.position.y - hamster.transform.position.y) < 2.0f) {
+		if (abs(hawk.transform.position.x - hamster.transform.position.x) < 2.0f && abs(hawk.transform.position.y - hamster.transform.position.y) < 2.0f &&
+			abs(hamster.transform.position.x) - 2.0f * hamster.length < GROUND_LENGTH &&
+			abs(hamster.transform.position.y) - 2.0f * hamster.width < GROUND_WIDTH) {
 			//grabbed = true;
 			state = State::Hawked;
 		}
 
 		if (state == State::Hawked) {
 			hamster.velocity = hawk.velocity;
+			
 		}
 
 		hawk.transform.position += elapsed*hawk.velocity;
@@ -622,6 +626,13 @@ namespace Hamster
 		}
 		if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
 			RotateDirection(&hamster, direction);
+		if (hawk.velocity.y < 0.0f) {
+			RotateDirection(&hawk, Direction::Right);
+		}
+		else {
+			RotateDirection(&hawk, Direction::Left);
+		}
+		RotateObject(&hawk, -0.5f*M_PI, glm::vec3(1.0f, 0.0f, 0.0f));
 		return true;
 	}
 

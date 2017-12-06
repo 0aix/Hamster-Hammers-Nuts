@@ -57,8 +57,7 @@ namespace Hamster
 		void Render();
 
 	private:
-		int level = 2;
-		bool grabbed = false;
+		int level = 1;
 		float speed = 7.5f;
 		Object hamster;
 		Object ground;
@@ -72,7 +71,7 @@ namespace Hamster
 		float gravity = 9.0f;
 		//bool on_ladder = false;
 		//bool transition = false;
-		int max_score = 1;
+		int max_score = 5;
 		float stun = 0.0f;
 		float windv = 0.0f;
 		float windt = 0.0f;

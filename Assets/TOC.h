@@ -4,23 +4,22 @@ namespace Hamster
 {
 	namespace TOC
 	{
-		const unsigned int VERSION = 1099980923;
+		const unsigned int VERSION = 2649704810;
 		const unsigned int ARMATURE_BODY_MESH = 0;
 		const unsigned int CIRCLE_MESH = 1;
 		const unsigned int CUBE_001_MESH = 2;
 		const unsigned int CUBE_MESH = 3;
 		const unsigned int GROUND_FALL_MESH = 4;
-		const unsigned int GROUND_SPRING_001_MESH = 5;
-		const unsigned int GROUND_SPRING_MESH = 6;
-		const unsigned int GROUND_SUMMER_MESH = 7;
-		const unsigned int GROUND_WINTER_MESH = 8;
-		const unsigned int HAMSTER_BODY_MESH = 9;
-		const unsigned int HAMSTER_EYES_MESH = 10;
-		const unsigned int ICE_MESH = 11;
-		const unsigned int LADDER_MESH = 12;
-		const unsigned int LOG_MESH = 13;
-		const unsigned int NUT_MESH = 14;
-		const unsigned int SQUARE_MESH = 15;
+		const unsigned int GROUND_SPRING_MESH = 5;
+		const unsigned int GROUND_SUMMER_MESH = 6;
+		const unsigned int GROUND_WINTER_MESH = 7;
+		const unsigned int HAMSTER_BODY_MESH = 8;
+		const unsigned int HAMSTER_EYES_MESH = 9;
+		const unsigned int ICE_MESH = 10;
+		const unsigned int LADDER_MESH = 11;
+		const unsigned int LOG_MESH = 12;
+		const unsigned int NUT_MESH = 13;
+		const unsigned int SQUARE_MESH = 14;
 		const unsigned int ARMATURE_SKN = 0;
 		const unsigned int HAMSTER_SKN = 1;
 		const unsigned int ARMATURE_DASH_ANIM = 0;
