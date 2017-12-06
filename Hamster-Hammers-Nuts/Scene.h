@@ -67,14 +67,17 @@ namespace Hamster
 		Direction direction;
 		Object* AddNut(glm::vec3 position, glm::quat rotation);
 		Object* AddLog(glm::vec3 position, glm::quat rotation);
+		Object* AddIce(glm::vec3 position);
 		std::vector<Object*> logs;
 		std::vector<Object*> nuts;
+		std::vector<Object*> ices;
 		float gravity = 9.0f;
 		//bool on_ladder = false;
 		//bool transition = false;
 		int max_score = 5;
 		float stun = 0.0f;
-		float windv = 0.0f;
+		float windxv = 0.0f;
+		float windyv = 0.0f;
 		float windt = 0.0f;
 		int score = 0;
 		float next_drop = 1.0f;
