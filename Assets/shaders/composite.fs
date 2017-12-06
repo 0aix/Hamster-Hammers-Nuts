@@ -22,6 +22,11 @@ vec3 textureNormal(sampler2D sampler, vec2 uv)
 	return 2.0 * texture(sampler, uv).xyz - vec3(1.0, 1.0, 1.0);
 }
 
+//void main()
+//{
+//	fragColor = vec4(vec3(texture(depthmap, uv).r), 1.0);
+//}
+
 // http://stylized.realtimerendering.com/
 void main()
 {

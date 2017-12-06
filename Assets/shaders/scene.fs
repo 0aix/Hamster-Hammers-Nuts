@@ -3,6 +3,7 @@
 in vec4 position;
 in vec3 normal;
 in vec3 color;
+in vec2 texCoord;
 in vec4 shadow;
 
 layout(location = 0) out vec4 fragColor;

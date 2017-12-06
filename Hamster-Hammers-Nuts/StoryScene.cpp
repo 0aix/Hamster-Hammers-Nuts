@@ -70,7 +70,7 @@ namespace Hamster
 		hamster.animated = true;
 		direction = Direction::Down;
 
-		ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
+		ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
 		ground.transform.scale = glm::vec3(0.5f);
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
@@ -643,7 +643,7 @@ namespace Hamster
 		for (auto it = logs.begin(); it != logs.end(); it++)
 			Graphics::RenderShadow(**it);
 		Graphics::RenderShadow(hamster);
-		//Graphics::RenderShadow(hawk);
+		Graphics::RenderShadow(hawk);
 
 		// scene
 		Graphics::BeginScene(to_light);
@@ -656,11 +656,16 @@ namespace Hamster
 		Graphics::RenderScene(hamster);
 		Graphics::RenderScene(ground);
 		Graphics::RenderScene(ladder);
-		//Graphics::RenderScene(hawk);
+		Graphics::RenderScene(hawk);
 		Graphics::CompositeScene();
 
 		// ui
 		//Graphics::UI(); / Graphics::Basic() / ::Draw()
+
+		// sprite test
+		//Graphics::BeginSprite();
+		//Graphics::RenderSprite(TOC::SNOW_PNG, glm::vec2(0.5f, 0.5f), glm::vec2(0.2f, 0.2f));
+		//Graphics::RenderSprite(TOC::SNOW_PNG, glm::vec2(0.0f, 0.0f), glm::vec2(1.0f, 1.0f));
 
 		Graphics::Present();
 	}

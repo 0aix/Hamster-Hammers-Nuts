@@ -59,7 +59,7 @@ namespace Hamster
 	private:
 		int level = 2;
 		bool grabbed = false;
-		float speed = 10.0f;
+		float speed = 7.5f;
 		Object hamster;
 		Object ground;
 		Object ladder;
