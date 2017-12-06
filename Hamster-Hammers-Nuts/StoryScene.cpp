@@ -75,7 +75,7 @@ namespace Hamster
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
 
-		hawk.mesh = Mesh(TOC::HAWK_MESH);
+		hawk.mesh = Mesh(TOC::ARMATURE_SKN);
 		hawk.transform.scale = glm::vec3(2.0f);
 		hawk.transform.position = glm::vec3(0.0f,70.0f,5.0f);
 		hawk.height = 3.0f;
