@@ -505,11 +505,25 @@ namespace Hamster
 			hamster.transform.position.x = -GROUND_LENGTH - hamster.length;
 			hamster.transform.position.z = -20.0f;
 			state = State::OnLadder2;
+			level += 1;
+			max_score = level * 5;
+			if (level < 4) {
+				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
+			}
+			else if (level < 7) {
+				ground.mesh = Mesh(TOC::GROUND_SUMMER_MESH);
+			}
+			else if (level < 10) {
+				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
+			}
+			else {
+				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
+			}
 		}
 		if (hamster.transform.position.z < -30.0f && state == State::Falling0 && hamster.velocity.z < 0.0f) {
 			logs.clear();
 			nuts.clear();
-			score = std::min(0,score-5);
+			score = std::max(0,score-5);
 			ladder.transform.position = glm::vec3(GROUND_LENGTH, 0.0f, 50.0f);
 			if (abs(hamster.transform.position.x) + hamster.length > GROUND_LENGTH) {
 				hamster.transform.position.x *= -0.7f;
@@ -520,6 +534,20 @@ namespace Hamster
 			state = State::Falling1;
 			hawk.transform.position.y = 100.0f;
 			hamster.transform.position.z = 50.0f;
+			level = std::max(level-1,1);
+			max_score = level * 5;
+			if (level < 4) {
+				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
+			}
+			else if (level < 7) {
+				ground.mesh = Mesh(TOC::GROUND_SUMMER_MESH);
+			}
+			else if (level < 10) {
+				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
+			}
+			else {
+				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
+			}
 		}
 		if (state == State::Falling1)
 		{
