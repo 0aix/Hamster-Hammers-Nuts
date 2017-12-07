@@ -4,7 +4,7 @@ namespace Hamster
 {
 	namespace TOC
 	{
-		const unsigned int VERSION = 604232976;
+		const unsigned int VERSION = 3906792945;
 		const unsigned int ARMATURE_BODY_MESH = 0;
 		const unsigned int CIRCLE_MESH = 1;
 		const unsigned int CUBE_001_MESH = 2;
@@ -15,11 +15,12 @@ namespace Hamster
 		const unsigned int GROUND_WINTER_MESH = 7;
 		const unsigned int HAMSTER_BODY_MESH = 8;
 		const unsigned int HAMSTER_EYES_MESH = 9;
-		const unsigned int ICE_MESH = 10;
-		const unsigned int LADDER_MESH = 11;
-		const unsigned int LOG_MESH = 12;
-		const unsigned int NUT_MESH = 13;
-		const unsigned int SQUARE_MESH = 14;
+		const unsigned int HOUSE_MESH = 10;
+		const unsigned int ICE_MESH = 11;
+		const unsigned int LADDER_MESH = 12;
+		const unsigned int LOG_MESH = 13;
+		const unsigned int NUT_MESH = 14;
+		const unsigned int SQUARE_MESH = 15;
 		const unsigned int ARMATURE_SKN = 0;
 		const unsigned int HAMSTER_SKN = 1;
 		const unsigned int ARMATURE_DASH_ANIM = 0;
@@ -43,14 +44,15 @@ namespace Hamster
 		const unsigned int GRASS_FALL_PNG = 4;
 		const unsigned int GRASS_SPRING_PNG = 5;
 		const unsigned int GRASS_SUMMER_PNG = 6;
-		const unsigned int ICE_PNG = 7;
-		const unsigned int INSTRUCTION_PNG = 8;
-		const unsigned int MENU_ENDLESS_PNG = 9;
-		const unsigned int MENU_HOW_PNG = 10;
-		const unsigned int MENU_QUIT_PNG = 11;
-		const unsigned int MENU_STORY_PNG = 12;
-		const unsigned int SKY_PNG = 13;
-		const unsigned int SNOW_PNG = 14;
+		const unsigned int HOUSE_PNG = 7;
+		const unsigned int ICE_PNG = 8;
+		const unsigned int INSTRUCTION_PNG = 9;
+		const unsigned int MENU_ENDLESS_PNG = 10;
+		const unsigned int MENU_HOW_PNG = 11;
+		const unsigned int MENU_QUIT_PNG = 12;
+		const unsigned int MENU_STORY_PNG = 13;
+		const unsigned int SKY_PNG = 14;
+		const unsigned int SNOW_PNG = 15;
 		const unsigned int C4_OGG = 0;
 		const unsigned int HB_OGG = 1;
 		const unsigned int HBB_OGG = 2;

@@ -298,7 +298,7 @@ namespace Hamster
 							hamster.velocity.y = -10.0;
 						if (log->transform.position.x - hamster.transform.position.x > 0.0f)
 							hamster.velocity.x = -10.0f;
-						if (score > 0)
+						if (score > 0 && score != max_score)
 							score--;
 						break;
 					}
@@ -441,7 +441,7 @@ namespace Hamster
 				it++;
 		}
 		//wind
-		if (level >= 7) {
+		if (level >= 4) {
 			if (windt != 0.0f) {
 				windt -= elapsed;
 				if (windt < 0.0f) {
@@ -454,11 +454,11 @@ namespace Hamster
 				int dir = mt_rand() % 6;
 				windt = 10.0f;
 				if (dir < 3) {
-					windyv = 2.5f*(dir - 1);
+					windyv = windv*(dir - 1);
 					windxv = 0.0f;
 				}
 				else {
-					windxv = 2.5f*(dir - 4);
+					windxv = windv*(dir - 4);
 					windyv = 0.0f;
 				}
 			}
@@ -484,7 +484,7 @@ namespace Hamster
 			nut->velocity.y = windyv;
 			nut->velocity.x = windxv;
 		}
-		if(level >= 4){
+		if(level >= 7){
 			if (hawk.transform.position.y > 60.0f) {
 				hawk.velocity.y = -10.0f;
 				hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;

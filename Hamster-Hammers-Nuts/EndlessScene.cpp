@@ -78,8 +78,6 @@ namespace Hamster
 
 		ground.transform.scale = glm::vec3(0.5f);
 
-		ladder.mesh = Mesh(TOC::LADDER_MESH);
-
 		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
 		//hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
 		hawk.anim.mesh.emplace_back(TOC::ARMATURE_BODY_MESH);
@@ -91,7 +89,6 @@ namespace Hamster
 		hawk.length = 2.0f;
 		hawk.width = 4.0f;
 
-		ladder.transform.position = glm::vec3(GROUND_LENGTH, 0.0f, 50.0f);
 
 		camera.set(100.0f, 0.2f * M_PI, 1.0f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
 	}
@@ -121,6 +118,27 @@ namespace Hamster
 		{
 			Game::NextScene(0);
 			return false;
+		}
+
+		transition_time -= elapsed;
+		if (transition_time < 0.0f) {
+			level = (mt_rand() % 4)*3 + 1;
+			transition_time = 20.0f;
+			speed = 7.5f;
+			windv = mt_rand() % 10;
+			if (level < 4) {
+				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
+			}
+			else if (level < 7) {
+				ground.mesh = Mesh(TOC::GROUND_SUMMER_MESH);
+			}
+			else if (level < 10) {
+				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
+			}
+			else {
+				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
+				speed = 5.0f;
+			}
 		}
 
 		//if (stun == 0.0f && !on_ladder && !swinging)
@@ -206,22 +224,6 @@ namespace Hamster
 			}
 		}
 
-		//if (score >= max_score && !on_ladder)
-		if (score >= max_score && state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
-		{
-			ladder.velocity.z = -20.0f;
-			if (ladder.transform.position.z <= 20.0f)
-			{
-				ladder.transform.position.z = 20.0f;
-				ladder.velocity.z = 0.0f;
-			}
-		}
-
-		if (ladder.transform.position.z < -30.0f)
-		{
-			ladder.transform.position = glm::vec3(GROUND_LENGTH, 0.0f, 50.0F);
-			ladder.velocity.z = 0.0f;
-		}
 
 		float x1 = hamster.transform.position.x + elapsed * hamster.velocity.x;
 		float y1 = hamster.transform.position.y + elapsed * hamster.velocity.y;
@@ -229,27 +231,6 @@ namespace Hamster
 
 		// 
 		//if (x1 > GROUND_LENGTH - hamster.length && stun == 0.0f && !swinging && ladder.transform.position.z == 20.0f)
-		if (x1 > GROUND_LENGTH - hamster.length && state <= State::Walking && ladder.transform.position.z == 20.0f)
-		{
-			if (score >= max_score && abs(hamster.transform.position.y) <= 2.0f &&
-				(direction == Direction::Up || direction == Direction::LeftUp || direction == Direction::RightUp))
-			{
-				state = State::OnLadder0;
-				direction = Direction::Up;
-				hamster.anim.Play(TOC::HAMSTER_TOCLIMB_ANIM, false);
-				score = 0;
-				hamster.velocity.x = 0.0f;
-				hamster.velocity.y = 0.0f;
-				hamster.velocity.z = 0.0f;
-			}
-		}
-		if (state == State::OnLadder0 && hamster.anim.state == AnimationState::FINISHED) {
-			hamster.anim.Play(TOC::HAMSTER_CLIMB_ANIM);
-			state = State::OnLadder1;
-			hamster.velocity.x = 0.0f;
-			hamster.velocity.y = 0.0f;
-			hamster.velocity.z = 5.0f;
-		}
 
 		if (abs(hamster.transform.position.x) - 2.0f * hamster.length > GROUND_LENGTH ||
 			abs(hamster.transform.position.y) - 2.0f * hamster.width > GROUND_WIDTH)
@@ -441,7 +422,7 @@ namespace Hamster
 				it++;
 		}
 		//wind
-		if (level >= 7) {
+		if (level >= 4) {
 			if (windt != 0.0f) {
 				windt -= elapsed;
 				if (windt < 0.0f) {
@@ -454,11 +435,11 @@ namespace Hamster
 				int dir = mt_rand() % 6;
 				windt = 10.0f;
 				if (dir < 3) {
-					windyv = 2.5f*(dir - 1);
+					windyv = windv*(dir - 1);
 					windxv = 0.0f;
 				}
 				else {
-					windxv = 2.5f*(dir - 4);
+					windxv = windv*(dir - 4);
 					windyv = 0.0f;
 				}
 			}
@@ -484,7 +465,7 @@ namespace Hamster
 			nut->velocity.y = windyv;
 			nut->velocity.x = windxv;
 		}
-		if (level >= 4) {
+		if (level >= 7) {
 			if (hawk.transform.position.y > 60.0f) {
 				hawk.velocity.y = -10.0f;
 				hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
@@ -507,99 +488,13 @@ namespace Hamster
 
 		hawk.transform.position += elapsed*hawk.velocity;
 		hamster.transform.position += elapsed*hamster.velocity;
-		if (hamster.transform.position.z > DROP_HEIGHT && hamster.velocity.z > 0.0f && state == State::OnLadder1)
-		{
-			logs.clear();
-			nuts.clear();
-			score = 0;
-			ladder.transform.position = glm::vec3(-GROUND_LENGTH, 0.0f, -20.0f);
-			hamster.transform.position.x = -GROUND_LENGTH - hamster.length;
-			hamster.transform.position.z = -20.0f;
-			state = State::OnLadder2;
-			level += 1;
-			max_score = level * 5;
-			next_drop = 10.0f;
-			speed = 7.5f;
-			if (level < 4) {
-				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
-			}
-			else if (level < 7) {
-				ground.mesh = Mesh(TOC::GROUND_SUMMER_MESH);
-			}
-			else if (level < 10) {
-				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
-			}
-			else if (level < 13) {
-				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
-				speed = 5.0f;
-			}
-			else {
-				ground.mesh = Mesh(TOC::HOUSE_MESH);
-			}
-
-		}
+		
 		if (hamster.transform.position.z < -30.0f && state == State::Falling0 && hamster.velocity.z < 0.0f) {
 			logs.clear();
 			nuts.clear();
-			score = std::max(0, score - 5);
-			ladder.transform.position = glm::vec3(GROUND_LENGTH, 0.0f, 50.0f);
-			if (abs(hamster.transform.position.x) + hamster.length > GROUND_LENGTH) {
-				hamster.transform.position.x *= -0.7f;
-			}
-			if (abs(hamster.transform.position.y) + hamster.width > GROUND_WIDTH) {
-				hamster.transform.position.y *= -0.7f;
-			}
-			state = State::Falling1;
-			hawk.transform.position.y = 100.0f;
-			hamster.transform.position.z = 50.0f;
-			level = std::max(level - 1, 1);
-			max_score = level * 5;
-			next_drop = 10.0f;
-			speed = 7.5f;
-			if (level < 4) {
-				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
-			}
-			else if (level < 7) {
-				ground.mesh = Mesh(TOC::GROUND_SUMMER_MESH);
-			}
-			else if (level < 10) {
-				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
-			}
-			else if (level < 13) {
-				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
-				speed = 5.0f;
-			}
-			else {
-				ground.mesh = Mesh(TOC::HOUSE_MESH);
-			}
+			//END GAME HERE SOMEHOW
 		}
-		if (state == State::Falling1)
-		{
-			if (hamster.velocity.z < 0.0f && hamster.transform.position.z < 0.0f)
-			{
-				state = State::Idle;
-				hamster.transform.position.z = 0.0f;
-				hamster.velocity.z = 0.0f;
-			}
-			hawk.transform.position.y = 100.0f;
-		}
-		if (state == State::OnLadder2)
-		{
-			if (hamster.velocity.z > 0.0f && hamster.transform.position.z > 0.0f)
-			{
-				state = State::Idle;
-				hamster.transform.position.z = 0.0f;
-				hamster.velocity.z = 0.0f;
-				hamster.transform.position += glm::vec3(2.0f, 0.0f, 0.0f);
-				//ladder.transform.position = glm::vec3(30.0f, 0.0f, 50.0f);
-				ladder.velocity.z = -20.0f;
-				game_over = true;
-				//END GAME HERE SOMEHOW
-			}
-			hawk.transform.position.y = 100.0f;
-		}
-		if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
-			ladder.transform.position.z += ladder.velocity.z*elapsed;
+		
 		for (auto nut : nuts) {
 			nut->transform.position += nut->velocity*elapsed;
 		}
@@ -615,57 +510,49 @@ namespace Hamster
 					if (direction == Direction::Up && abs(hamster.transform.position.x - nut->transform.position.x + 2.0f) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 					if (direction == Direction::Down && abs(hamster.transform.position.x - nut->transform.position.x - 2.0f) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 					if (direction == Direction::Left && abs(hamster.transform.position.x - nut->transform.position.x) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y + 2.0f) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 					if (direction == Direction::Right && abs(hamster.transform.position.x - nut->transform.position.x) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y - 2.0f) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 					if (direction == Direction::LeftUp && abs(hamster.transform.position.x - nut->transform.position.x + 2.0f*0.707107f) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y + 2.0f*0.707107f) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 					if (direction == Direction::LeftDown && abs(hamster.transform.position.x - nut->transform.position.x - 2.0f*0.707107f) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y + 2.0f*0.707107f) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 					if (direction == Direction::RightUp && abs(hamster.transform.position.x - nut->transform.position.x + 2.0f*0.707107f) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y - 2.0f*0.707107f) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 					if (direction == Direction::RightDown && abs(hamster.transform.position.x - nut->transform.position.x - 2.0f*0.707107f) <= 1.0f &&
 						abs(hamster.transform.position.y - nut->transform.position.y - 2.0f*0.707107f) <= 1.0f) {
 						it = nuts.erase(it);
-						if (score < max_score)
-							score++;
+						score++;
 						break;
 					}
 				}
@@ -722,7 +609,6 @@ namespace Hamster
 			Graphics::RenderScene(**it);
 		Graphics::RenderScene(hamster);
 		Graphics::RenderScene(ground);
-		Graphics::RenderScene(ladder);
 		Graphics::RenderScene(hawk);
 		if (state <= State::Swinging)
 		{
@@ -771,26 +657,19 @@ namespace Hamster
 		Graphics::BeginSprite();
 		// draw acorn
 		// draw numbers depending on # of digits of max score
-		if (max_score < 10)
+		
+		// draw first number
+		if (score < 10) // draw 0
 		{
-			// draw first number
-			// draw /
-			// draw second number
+
 		}
 		else
 		{
-			// draw first number
-			if (score < 10) // draw 0
-			{
 
-			}
-			else
-			{
-
-			}
-			// draw /
-			// draw second number
 		}
+		// draw /
+		// draw second number
+		
 
 		Graphics::Present();
 	}

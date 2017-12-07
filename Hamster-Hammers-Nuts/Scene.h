@@ -58,6 +58,7 @@ namespace Hamster
 
 	private:
 		bool game_over;
+		float windv = 2.5f;
 		int level = 1;
 		float speed = 7.5f;
 		Object hamster;
@@ -108,13 +109,14 @@ namespace Hamster
 		void Render();
 
 	private:
+		float transition_time = 20.0f;
+		float windv = 2.5f;
 		bool game_over;
 		int level = 1;
 		float speed = 7.5f;
 		Object hamster;
 		Object target;
 		Object ground;
-		Object ladder;
 		Object hawk;
 		Direction direction;
 		Object* AddNut(glm::vec3 position, glm::quat rotation);
@@ -122,8 +124,6 @@ namespace Hamster
 		std::vector<Object*> logs;
 		std::vector<Object*> nuts;
 		float gravity = 9.0f;
-		//bool on_ladder = false;
-		//bool transition = false;
 		float stun = 0.0f;
 		float windxv = 0.0f;
 		float windyv = 0.0f;
