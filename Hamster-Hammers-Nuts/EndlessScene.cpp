@@ -82,9 +82,9 @@ namespace Hamster
 		//hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
 		hawk.anim.mesh.emplace_back(TOC::ARMATURE_BODY_MESH);
 		hawk.animated = true;
-		hawk.transform.scale = glm::vec3(2.0f);
+		hawk.transform.scale = glm::vec3(3.0f);
 
-		hawk.transform.position = glm::vec3(70.0f, 0.0f, -3.0f);
+		hawk.transform.position = glm::vec3(70.0f, 0.0f, -7.5f);
 		hawk.height = 3.0f;
 		hawk.length = 2.0f;
 		hawk.width = 4.0f;
