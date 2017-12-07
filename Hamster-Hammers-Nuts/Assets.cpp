@@ -96,8 +96,10 @@ namespace Hamster
 			sounds = new Sound[size];
 			for (int i = 0; i < size; i++)
 			{
-				// if (i == TOC::BGM_OGG)
-				Audio::LoadChunk(&sounds[i], &buffer[oggs[i].start], oggs[i].count);
+				if (i == TOC::BGM_OGG)
+					Audio::LoadMusic(&sounds[i], &buffer[oggs[i].start], oggs[i].count);
+				else
+					Audio::LoadChunk(&sounds[i], &buffer[oggs[i].start], oggs[i].count);
 			}
 
 			ifs.close();
