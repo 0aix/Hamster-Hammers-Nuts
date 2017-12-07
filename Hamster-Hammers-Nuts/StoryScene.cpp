@@ -95,8 +95,7 @@ namespace Hamster
 		camera.set(100.0f, 0.2f * M_PI, 1.0f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
 
 		gravity = 18.0f;
-		level = 11;
-		score = 58;
+		level = 1;
 		next_drop = 3.0f;
 		whiteout = 1.0f;
 		hawk_pos = HAWK_POS;
@@ -216,6 +215,7 @@ namespace Hamster
 			if (whiteout > 2.0f)
 			{
 				Game::NextScene(new MainMenu());
+				Audio::Play(TOC::BGM_OGG);
 				return false;
 			}
 			return true;
@@ -637,6 +637,7 @@ namespace Hamster
 			else {
 				ground.mesh = Mesh(TOC::HOUSE_MESH);
 				whiteout = 0.05f;
+				Audio::HaltMusic();
 			}
 
 		}
@@ -809,7 +810,6 @@ namespace Hamster
 		}
 		if (state == State::Falling0 || state == State::Falling1)
 			hamster.velocity.z -= elapsed * gravity;
-
 		return true;
 	}
 
@@ -882,8 +882,6 @@ namespace Hamster
 				break;
 			}
 			Graphics::RenderScene(target, 0.5f);
-			//
-			target.transform.position = hamster.transform.position;
 		}
 
 		// background

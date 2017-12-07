@@ -63,7 +63,7 @@ void main()
     else if (intensity > 0.25) coeff = 0.50;
     else                       coeff = 0.25;
 	coeff = 0.7 + 0.5 * coeff;
-	// hacks are real
+	// intense hacking
 	if (alpha == 1.0)
 	{
 		fragColor = vec4(coeff * color, 1.0);

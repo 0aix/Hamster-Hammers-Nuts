@@ -22,11 +22,6 @@ vec3 textureNormal(sampler2D sampler, vec2 uv)
 	return 2.0 * texture(sampler, uv).xyz - vec3(1.0, 1.0, 1.0);
 }
 
-//void main()
-//{
-//	fragColor = vec4(vec3(texture(depthmap, uv).r), 1.0);
-//}
-
 // http://stylized.realtimerendering.com/
 void main()
 {
@@ -57,13 +52,11 @@ void main()
 	float sobelY = dot(sobelV, vec4(1.0, 1.0, 1.0, 1.0));
 	float sobel = sqrt(sobelX * sobelX + sobelY * sobelY) * 10.0 / centerDepth;
 	float coeff = clamp(1.0 - pow(clamp(sobel, 0.0, 1.0), 1.0), 0.0, 1.0);
-	//fragColor = vec4(texture(diffusemap, uv).xyz * coeff, 1.0);
 
 	// Normal
-
 	vec3 center = textureNormal(normalmap, uv);
-	
 	vec3 samples[8];
+
 	// Diags
 	samples[0] = textureNormal(normalmap, uv + vec2(-dxN, dyN));
 	samples[1] = textureNormal(normalmap, uv + vec2(dxN, dyN));
@@ -74,35 +67,7 @@ void main()
 	samples[5] = textureNormal(normalmap, uv + vec2(-dxN, 0.0));
 	samples[6] = textureNormal(normalmap, uv + vec2(dxN, 0.0));
 	samples[7] = textureNormal(normalmap, uv + vec2(0.0, -dyN));
-	/*
-	vec4 diagDiffs = vec4(samples[0].y,
-						  samples[1].y,
-						  samples[2].y,
-						  samples[3].y);
-	vec4 axisDiffs = vec4(samples[4].y,
-						  samples[5].y,
-						  samples[6].y,
-						  samples[7].y);
-	float diffThresh = center.y;
-	if (diagDiffs.x <= diffThresh) diagDiffs.x = diffThresh;
-	if (diagDiffs.y <= diffThresh) diagDiffs.y = diffThresh;
-	if (diagDiffs.z <= diffThresh) diagDiffs.z = diffThresh;
-	if (diagDiffs.w <= diffThresh) diagDiffs.w = diffThresh;
-	if (axisDiffs.x <= diffThresh) axisDiffs.x = diffThresh;
-	if (axisDiffs.y <= diffThresh) axisDiffs.y = diffThresh;
-	if (axisDiffs.z <= diffThresh) axisDiffs.z = diffThresh;
-	if (axisDiffs.w <= diffThresh) axisDiffs.w = diffThresh;
-	diagDiffs -= diffThresh;
-	axisDiffs -= diffThresh;
-	vec4 sobelHN = diagDiffs * vec4(C, -C, C, -C) +
-				   axisDiffs * vec4(0.0, D, -D, 0.0);
-	vec4 sobelVN = diagDiffs * vec4(A, A, -A, -A) +
-				   axisDiffs * vec4(B, 0.0, 0.0, -B);
-	float sobelXN = dot(sobelHN, vec4(1.0, 1.0, 1.0, 1.0));
-	float sobelYN = dot(sobelVN, vec4(1.0, 1.0, 1.0, 1.0));
-	float sobelN = sqrt(sobelXN * sobelXN + sobelYN * sobelYN) * 0.5;
-	float coeffN = clamp(1.0 - pow(clamp(sobelN, 0.0, 1.0), 8.0), 0.0, 1.0);
-	*/
+
 	vec3 diffs[8];
 	for (int i = 0; i < 8; i++)
 		diffs[i] = abs(samples[i] - center);

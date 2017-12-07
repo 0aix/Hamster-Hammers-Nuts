@@ -40,6 +40,11 @@ namespace Hamster
 				Mix_PlayChannel(-1, Assets::sounds[oggID].chunk, 0);
 		}
 
+		void HaltMusic()
+		{
+			Mix_HaltMusic();
+		}
+
 		void ToggleMute()
 		{
 			static int mvolume = 0;

@@ -20,6 +20,7 @@ namespace Hamster
 		void LoadChunk(Sound* sound, char* data, int size);
 		
 		void Play(unsigned int oggID);
+		void HaltMusic();
 		void ToggleMute();
 		
 		void HaltChannels();

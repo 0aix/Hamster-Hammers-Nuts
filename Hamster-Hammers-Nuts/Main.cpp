@@ -8,6 +8,7 @@ using namespace Hamster;
 #define WINDOW_NAME "Hamster Hammers Nuts"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+// ^hard-coded everywhere =/
 
 int main(int argc, char** args)
 {

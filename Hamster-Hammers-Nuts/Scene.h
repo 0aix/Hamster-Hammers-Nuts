@@ -132,10 +132,14 @@ namespace Hamster
 		float windyv = 0.0f;
 		float windt = 0.0f;
 		int score = 0;
+		int max_score = 0;
 		float next_drop = 1.0f;
 		float drop_interval = 1.0f;
 		bool hawkstrike = false;
 		int paused = 0;
+		float whiteout = 0.0f;
+		float skyoffset = 0.0f;
+		float hawk_pos;
 
 		enum class State
 		{
@@ -150,6 +154,22 @@ namespace Hamster
 			Falling1,
 			Hawked
 		} state;
+	};
+
+	class EndScene : public Scene
+	{
+	public:
+		EndScene(int score);
+		bool HandleInput();
+		bool Update();
+		void Render();
+
+	private:
+		Object hamster;
+		Object hawk;
+		int max_score;
+		float time = 0.0f;
+		float skyoffset = 0.0f;
 	};
 
 	class MainMenu : public Scene

@@ -16,6 +16,7 @@
 #define DROP_HEIGHT 15
 #define SWING_FACTOR 1.3f
 #define WALK_FACTOR 1.8f
+#define HAWK_POS 700.0f
 
 namespace Hamster
 {
@@ -72,34 +73,95 @@ namespace Hamster
 		hamster.animated = true;
 		direction = Direction::Down;
 
-		ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
 		target.mesh = Mesh(TOC::CIRCLE_MESH);
-		target.transform.scale = glm::vec3(1.0f, 1.0f, 0.001f);
+		target.transform.scale = glm::vec3(0.9f, 0.9f, 0.001f);
+		indicator.mesh = Mesh(TOC::SQUARE_MESH);
+		indicator.transform.scale = glm::vec3(1.5f, GROUND_WIDTH, 0.001f);
 
+		ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
 		ground.transform.scale = glm::vec3(0.5f);
 
-		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
-		//hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
+		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_FLAP_ANIM, true, 3.0f);
 		hawk.anim.mesh.emplace_back(TOC::ARMATURE_BODY_MESH);
 		hawk.animated = true;
 		hawk.transform.scale = glm::vec3(3.0f);
-
-		hawk.transform.position = glm::vec3(70.0f, 0.0f, -7.5f);
+		hawk.transform.position = glm::vec3(7.0f, HAWK_POS * 2.0f, -7.5f);
 		hawk.height = 3.0f;
 		hawk.length = 2.0f;
 		hawk.width = 4.0f;
 
-
 		camera.set(100.0f, 0.2f * M_PI, 1.0f * M_PI, glm::vec3(0.0f, 0.0f, 0.0f));
+
+		gravity = 18.0f;
+		level = 1;
+		next_drop = 3.0f;
+		whiteout = 1.0f;
+		hawk_pos = HAWK_POS;
 	}
 
 	bool EndlessScene::HandleInput()
 	{
-		if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_SPACE && state <= State::Walking)
+		if (paused == 0)
 		{
-			hamster.velocity = glm::vec3(0.0f);
-			hamster.anim.Play(TOC::HAMSTER_SWING_ANIM, false, true, SWING_FACTOR);
-			state = State::Swinging;
+			if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_SPACE && state <= State::Walking)
+			{
+				hamster.velocity = glm::vec3(0.0f);
+				hamster.anim.Play(TOC::HAMSTER_SWING_ANIM, false, true, SWING_FACTOR);
+				state = State::Swinging;
+			}
+			if (Game::event.window.event == SDL_WINDOWEVENT_FOCUS_LOST ||
+				(Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_ESCAPE))
+			{
+				Audio::PauseChannels();
+				paused = 1;
+			}
+		}
+		else
+		{
+			if (Game::event.type == SDL_KEYDOWN)
+			{
+				if (Game::event.key.keysym.sym == SDLK_ESCAPE)
+				{
+					Audio::ResumeChannels();
+					paused = 0;
+				}
+				else if (Game::event.key.keysym.sym == SDLK_w)
+				{
+					if (paused == 2)
+						paused = 1;
+				}
+				else if (Game::event.key.keysym.sym == SDLK_s)
+				{
+					if (paused == 1)
+						paused = 2;
+				}
+				else if (Game::event.key.keysym.sym == SDLK_RETURN || Game::event.key.keysym.sym == SDLK_SPACE)
+				{
+					if (paused == 1)
+					{
+						Audio::ResumeChannels();
+						paused = 0;
+					}
+					else
+					{
+						Audio::HaltChannels();
+						Game::NextScene(new MainMenu());
+						return false;
+					}
+				}
+			}
+		}
+		if (Game::event.type == SDL_KEYDOWN && Game::event.key.keysym.sym == SDLK_BACKQUOTE)
+			Audio::ToggleMute();
+		if (Game::event.type == SDL_MOUSEBUTTONDOWN)
+		{
+			if (Game::event.button.button == SDL_BUTTON_LEFT)
+			{
+				float dx = Game::event.button.x - 770.0f;
+				float dy = Game::event.button.y - 570.0f;
+				if (dx * dx + dy * dy <= 400.0f)
+					Audio::ToggleMute();
+			}
 		}
 		return true;
 	}
@@ -120,12 +182,26 @@ namespace Hamster
 			return false;
 		}
 
+		if (paused > 0)
+			return true;
+
+		skyoffset -= elapsed * 0.05f;
+		if (skyoffset <= 0.0f)
+			skyoffset += 1.0f;
+
+		if (whiteout >= 0.0f)
+			whiteout -= elapsed * 0.5f;
+
 		transition_time -= elapsed;
-		if (transition_time < 0.0f) {
+		if (transition_time < 0.0f && !hawkstrike) {
 			level = (mt_rand() % 4)*3 + 1;
 			transition_time = 20.0f;
 			speed = 7.5f;
 			windv = mt_rand() % 10;
+			hawk.transform.position.y = (((int)mt_rand() % 2) * 2 - 1) * hawk_pos * 2.0f;
+			hawk.velocity.y = 0.0f;
+			hawkstrike = false;
+			hawk_pos = HAWK_POS - (level - 7) * 100.0f;
 			if (level < 4) {
 				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
 			}
@@ -141,7 +217,6 @@ namespace Hamster
 			}
 		}
 
-		//if (stun == 0.0f && !on_ladder && !swinging)
 		if (state <= State::Walking)
 		{
 			state = State::Walking;
@@ -229,38 +304,26 @@ namespace Hamster
 		float y1 = hamster.transform.position.y + elapsed * hamster.velocity.y;
 		float z1 = hamster.transform.position.z;
 
-		// 
-		//if (x1 > GROUND_LENGTH - hamster.length && stun == 0.0f && !swinging && ladder.transform.position.z == 20.0f)
-
 		if (abs(hamster.transform.position.x) - 2.0f * hamster.length > GROUND_LENGTH ||
 			abs(hamster.transform.position.y) - 2.0f * hamster.width > GROUND_WIDTH)
 		{
+			if (state == State::Hawked)
+				hamster.transform.position.y = hamster.transform.position.y < 0.0f ? -GROUND_WIDTH - 5.0f * hamster.width : GROUND_WIDTH + 5.0f * hamster.width;
 			state = State::Falling0;
-			//if (grabbed)
-			//	grabbed = false;
-			//on_ladder = true;
-			//transition = true;
 			score = std::max(0, score - 5);
 			hamster.velocity.x = 0.0f;
 			hamster.velocity.y = 0.0f;
 			hamster.velocity.z -= elapsed * gravity;
 		}
 
-		//if (stun != 0.0f)
 		if (state == State::Stunned)
 		{
 			stun -= elapsed;
 			RotateObject(&hamster, 540.0f * elapsed, glm::vec3(0.0f, 0.0f, 1.0f));
 			if (stun < 0.0f)
 				state = State::Idle;
-			//stun = 0.0f;
 		}
 
-		//if (stun != 0.0f) {
-		//	stun -= elapsed;
-		//	if (stun < 0.0f)
-		//		stun = 0.0f;
-		//}
 		if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2) {
 			for (auto log : logs)
 			{
@@ -271,6 +334,8 @@ namespace Hamster
 					if (abs(log->transform.position.x - hamster.transform.position.x) < hamster.length + log->length &&
 						abs(log->transform.position.y - hamster.transform.position.y) < hamster.width + log->width)
 					{
+						if (score > 0 && stun < 0.9f)
+							score--;
 						state = State::Stunned;
 						stun = 1.0f;
 						hamster.velocity.x = 10.0f;
@@ -279,8 +344,6 @@ namespace Hamster
 							hamster.velocity.y = -10.0;
 						if (log->transform.position.x - hamster.transform.position.x > 0.0f)
 							hamster.velocity.x = -10.0f;
-						if (score > 0)
-							score--;
 						break;
 					}
 				}
@@ -293,6 +356,8 @@ namespace Hamster
 					if (abs(nut->transform.position.x - hamster.transform.position.x) < hamster.length + nut->length &&
 						abs(nut->transform.position.y - hamster.transform.position.y) < hamster.width + nut->width)
 					{
+						if (score > 0 && stun < 0.9f)
+							score--;
 						state = State::Stunned;
 						stun = 1.0f;
 						hamster.velocity.x = 10.0f;
@@ -301,8 +366,6 @@ namespace Hamster
 							hamster.velocity.y = -10.0;
 						if (nut->transform.position.x - hamster.transform.position.x > 0.0f)
 							hamster.velocity.x = -10.0f;
-						if (score > 0)
-							score--;
 						break;
 					}
 				}
@@ -331,8 +394,6 @@ namespace Hamster
 		hamster.anim.Update(elapsed);
 		hawk.anim.Update(elapsed);
 
-		//if (!swinging)
-		//if (state != State::Swinging)
 		if (state == State::Idle)
 		{
 			hamster.anim.Play(TOC::HAMSTER_STAND_ANIM);
@@ -344,8 +405,9 @@ namespace Hamster
 
 		next_drop -= elapsed;
 		if (next_drop <= 0.0f) {
-			next_drop = drop_interval;
-			int drop_type = mt_rand() % (level / 4 + 1);
+			//next_drop = drop_interval;
+			//int drop_type = level < 4 ? 0 : mt_rand() % (level / 4 + 1);
+			int drop_type = level < 4 ? 0 : mt_rand() % 2;
 			glm::vec3 pos =
 				glm::vec3((float)(mt_rand() % (2 * (GROUND_LENGTH - 3))) - ((float)GROUND_LENGTH - 3.0f),
 				(float)(mt_rand() % (2 * (GROUND_WIDTH - 3))) - ((float)GROUND_WIDTH - 3.0f), 50.0f);
@@ -374,6 +436,7 @@ namespace Hamster
 					AddLog(pos, quart);
 
 				}
+				next_drop = drop_interval;
 			}
 		}
 
@@ -465,19 +528,29 @@ namespace Hamster
 			nut->velocity.y = windyv;
 			nut->velocity.x = windxv;
 		}
+		// HAWK STRIKE
 		if (level >= 7) {
-			if (hawk.transform.position.y > 60.0f) {
-				hawk.velocity.y = -10.0f;
-				hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
+			if (hawk.transform.position.y >= hawk_pos) {
+				hawk.velocity.y = -200.0f;
+				hawk.transform.position.x = (int)((unsigned int)mt_rand() % (2 * (GROUND_LENGTH - 3))) - (GROUND_LENGTH - 3);
 			}
-			if (hawk.transform.position.y < -60.0f) {
-				hawk.velocity.y = 10.0f;
-				hawk.transform.position.x = mt_rand() % (2 * (GROUND_LENGTH - 3)) - GROUND_LENGTH + 3;
+			else if (hawk.transform.position.y <= -hawk_pos) {
+				hawk.velocity.y = 200.0f;
+				hawk.transform.position.x = (int)((unsigned int)mt_rand() % (2 * (GROUND_LENGTH - 3))) - (GROUND_LENGTH - 3);
+			}
+			else if (hawk.velocity.y > 0.0f && hawk.transform.position.y >= 50.0f)
+				hawkstrike = false;
+			else if (hawk.velocity.y < 0.0f && hawk.transform.position.y <= -50.0f)
+				hawkstrike = false;
+			else if (!hawkstrike && (abs(hawk.transform.position.y) < hawk_pos * 0.3f || abs(hawk.transform.position.y) < 250.0f))
+			{
+				Audio::Play(TOC::HAWK_OGG);
+				hawkstrike = true;
+				indicator.transform.position = glm::vec3(hawk.transform.position.x, 0.0f, 0.01f);
 			}
 			if (abs(hawk.transform.position.x - hamster.transform.position.x) < 2.0f && abs(hawk.transform.position.y - hamster.transform.position.y) < 2.0f &&
 				abs(hamster.transform.position.x) - 2.0f * hamster.length < GROUND_LENGTH &&
 				abs(hamster.transform.position.y) - 2.0f * hamster.width < GROUND_WIDTH) {
-				//grabbed = true;
 				state = State::Hawked;
 			}
 
@@ -492,6 +565,11 @@ namespace Hamster
 		if (hamster.transform.position.z < -30.0f && state == State::Falling0 && hamster.velocity.z < 0.0f) {
 			logs.clear();
 			nuts.clear();
+			if (score == 0)
+			{
+				Game::NextScene(new EndScene(max_score));
+				return false;
+			}
 			//END GAME HERE SOMEHOW
 		}
 		
@@ -502,69 +580,82 @@ namespace Hamster
 			log->transform.position += log->velocity*elapsed;
 		}
 
-		if (state == State::Swinging && hamster.anim.frame_number == 15) {
-
+		if (state == State::Swinging && hamster.anim.frame_number == 12) {
+			bool thunk = false;
 			for (auto it = nuts.begin(); it != nuts.end(); it++) {
 				auto nut = *it;
-				if (nut->velocity.z == 0.0f) {
-					if (direction == Direction::Up && abs(hamster.transform.position.x - nut->transform.position.x + 2.0f) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y) <= 1.0f) {
+				//if (nut->velocity.z == 0.0f) {
+				if (nut->transform.position.z <= 1.0f)
+				{
+					float dx = hamster.transform.position.x - nut->transform.position.x;
+					float dy = hamster.transform.position.y - nut->transform.position.y;
+					if (direction == Direction::Up && abs(dx + 2.3f) <= 0.9f && abs(dy) <= 0.9f)
+					{
 						it = nuts.erase(it);
 						score++;
+						max_score++;
+						thunk = true;
 						break;
 					}
-					if (direction == Direction::Down && abs(hamster.transform.position.x - nut->transform.position.x - 2.0f) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y) <= 1.0f) {
+					if (direction == Direction::Down && abs(dx - 2.3f) <= 0.9f && abs(dy) <= 0.9f) {
 						it = nuts.erase(it);
 						score++;
+						max_score++;
+						thunk = true;
 						break;
 					}
-					if (direction == Direction::Left && abs(hamster.transform.position.x - nut->transform.position.x) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y + 2.0f) <= 1.0f) {
+					if (direction == Direction::Left && abs(dx) <= 0.9f && abs(dy + 2.3f) <= 0.9f) {
 						it = nuts.erase(it);
 						score++;
+						max_score++;
+						thunk = true;
 						break;
 					}
-					if (direction == Direction::Right && abs(hamster.transform.position.x - nut->transform.position.x) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y - 2.0f) <= 1.0f) {
+					if (direction == Direction::Right && abs(dx) <= 0.9f && abs(dy - 2.3f) <= 0.9f)
+					{
 						it = nuts.erase(it);
 						score++;
+						max_score++;
+						thunk = true;
 						break;
 					}
-					if (direction == Direction::LeftUp && abs(hamster.transform.position.x - nut->transform.position.x + 2.0f*0.707107f) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y + 2.0f*0.707107f) <= 1.0f) {
+					if (direction == Direction::LeftUp && abs(dx + 1.626346f) <= 0.9f && abs(dy + 1.626346f) <= 0.9f) {
 						it = nuts.erase(it);
 						score++;
+						max_score++;
+						thunk = true;
 						break;
 					}
-					if (direction == Direction::LeftDown && abs(hamster.transform.position.x - nut->transform.position.x - 2.0f*0.707107f) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y + 2.0f*0.707107f) <= 1.0f) {
+					if (direction == Direction::LeftDown && abs(dx - 1.626346f) <= 0.9f && abs(dy + 1.626346f) <= 0.9f) {
 						it = nuts.erase(it);
 						score++;
+						max_score++;
+						thunk = true;
 						break;
 					}
-					if (direction == Direction::RightUp && abs(hamster.transform.position.x - nut->transform.position.x + 2.0f*0.707107f) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y - 2.0f*0.707107f) <= 1.0f) {
+					if (direction == Direction::RightUp && abs(dx + 1.626346f) <= 0.9f && abs(dy - 1.626346f) <= 0.9f) {
 						it = nuts.erase(it);
-						score++;
+							score++;
+						thunk = true;
 						break;
 					}
-					if (direction == Direction::RightDown && abs(hamster.transform.position.x - nut->transform.position.x - 2.0f*0.707107f) <= 1.0f &&
-						abs(hamster.transform.position.y - nut->transform.position.y - 2.0f*0.707107f) <= 1.0f) {
+					if (direction == Direction::RightDown && abs(dx - 1.626346f) <= 0.9f && abs(dy - 1.626346f) <= 0.9f) {
 						it = nuts.erase(it);
 						score++;
+						max_score++;
+						thunk = true;
 						break;
 					}
 				}
 			}
+			if (thunk)
+				Audio::Play(TOC::CRACK_OGG);
 		}
 
 		if (state == State::Swinging && hamster.anim.state == AnimationState::FINISHED)
 		{
 			state = State::Idle;
-			//swinging = false;
 		}
-		//if (state != State::OnLadder0 && state != State::OnLadder1 && state != State::OnLadder2)
 		if (state != State::Stunned)
 			RotateDirection(&hamster, direction);
 		if (hawk.velocity.y < 0.0f) {
@@ -573,6 +664,8 @@ namespace Hamster
 		else {
 			RotateDirection(&hawk, Direction::Left);
 		}
+		if (state == State::Falling0 || state == State::Falling1)
+			hamster.velocity.z -= elapsed * gravity;
 		return true;
 	}
 
@@ -610,66 +703,92 @@ namespace Hamster
 		Graphics::RenderScene(hamster);
 		Graphics::RenderScene(ground);
 		Graphics::RenderScene(hawk);
+
+		if (hawkstrike)
+			Graphics::RenderScene(indicator, 0.75f);
+
 		if (state <= State::Swinging)
 		{
 			switch (direction)
 			{
 			case Direction::Left:
-				target.transform.position = hamster.transform.position + glm::vec3(0.0f, 2.0f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(0.0f, 2.3f, 0.0f);
 				break;
 			case Direction::Right:
-				target.transform.position = hamster.transform.position + glm::vec3(0.0f, -2.0f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(0.0f, -2.3f, 0.0f);
 				break;
 			case Direction::Down:
-				target.transform.position = hamster.transform.position + glm::vec3(-2.0f, 0.0f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(-2.3f, 0.0f, 0.0f);
 				break;
 			case Direction::Up:
-				target.transform.position = hamster.transform.position + glm::vec3(2.0f, 0.0f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(2.3f, 0.0f, 0.0f);
 				break;
 			case Direction::LeftDown:
-				target.transform.position = hamster.transform.position + glm::vec3(-2.0f * 0.707107f, 2.0f * 0.707107f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(-1.626346f, 1.626346f, 0.0f);
 				break;
 			case Direction::LeftUp:
-				target.transform.position = hamster.transform.position + glm::vec3(2.0f * 0.707107f, 2.0f * 0.707107f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(1.626346f, 1.626346f, 0.0f);
 				break;
 			case Direction::RightDown:
-				target.transform.position = hamster.transform.position + glm::vec3(-2.0f * 0.707107f, -2.0f * 0.707107f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(-1.626346f, -1.626346f, 0.0f);
 				break;
 			case Direction::RightUp:
-				target.transform.position = hamster.transform.position + glm::vec3(2.0f * 0.707107f, -2.0f * 0.707107f, 0.0f);
+				target.transform.position = hamster.transform.position + glm::vec3(1.626346f, -1.626346f, 0.0f);
 				break;
 			}
-			Graphics::RenderScene(target, 0.75f);
-			target.transform.position = hamster.transform.position;
-			//target.transform.scale = glm::vec3(0.4f, 0.4f, 0.001f);
-			Graphics::RenderScene(target, 0.75f);
-			//target.transform.scale = glm::vec3(1.0f, 1.0f, 0.001f);
+			Graphics::RenderScene(target, 0.5f);
 		}
 
 		// background
 		Graphics::BeginSprite();
-		Graphics::RenderSprite(TOC::SKY_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
+		Graphics::RenderSprite(TOC::SKY_PNG, glm::vec4(-1.0f, 1.0f, -1.0f + skyoffset * 2.0f, -1.0f),
+			glm::vec4(1.0f - skyoffset, 1.0f, 1.0f, 0.0f));
+		Graphics::RenderSprite(TOC::SKY_PNG, glm::vec4(-1.0f + skyoffset * 2.0f, 1.0f, 1.0f, -1.0f),
+			glm::vec4(0.0f, 1.0f, 1.0f - skyoffset, 0.0f));
 
 		// actual scene
 		Graphics::CompositeScene();
 
 		// ui
 		Graphics::BeginSprite();
-		// draw acorn
-		// draw numbers depending on # of digits of max score
-		
-		// draw first number
-		if (score < 10) // draw 0
-		{
+		const float loc_x[11] = { .027f, .116f, .207f, .296f, .386f, .481f, .566f, .662f, .747f, .838f, .92f };
+		const float loc_y[12] = { .85f, .85f, .85f, .675f, .675f, .675f, .5f, .5f, .5f, .325f, .325f, .325f };
+		const float ax = -1.0f + 2.0f * 10.0f / 800.0f;
+		const float ay = 1.0f - 2.0f * 15.0f / 600.0f;
+		const float aw = 2.0f * 50.0f / 800.0f;
+		const float ah = 2.0f * 50.0f / 600.0f;
+		const float bx = ax + aw;
+		const float by = 1.0f - 2.0f * 16.0f / 600.0f;
+		const float w = 2.0f * 36.0f / 800.0f;
+		const float h = 2.0f * 48.0f / 600.0f;
 
+		Graphics::RenderSprite(TOC::NUT_LINE_PNG, glm::vec4(ax, ay, ax + aw, ay - ah));
+		int i = score;
+		int j = level - 1;
+		int n = 0;
+		// draw score
+		while (i >= 10)
+		{
+			Graphics::RenderSprite(TOC::NUMBER_PNG, glm::vec4(bx + n * w, by, bx + (n + 1) * w, by - h),
+													glm::vec4(loc_x[i / 10], loc_y[j], loc_x[i / 10] + 0.06f, loc_y[j] - 0.1f));
+			n++;
+			i %= 10;
 		}
+		Graphics::RenderSprite(TOC::NUMBER_PNG, glm::vec4(bx + n * w, by, bx + (n + 1) * w, by - h),
+												glm::vec4(loc_x[i], loc_y[j], loc_x[i] + 0.06f, loc_y[j] - 0.1f));
+
+		if (whiteout >= 0.0f)
+			Graphics::RenderSprite(TOC::DIFFUSE_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f), glm::vec4(0.0f, 1.0f, 1.0f, 0.0f), glm::vec4(0.0f, 0.0f, 0.0f, whiteout));
+
+		if (paused == 1)
+			Graphics::RenderSprite(TOC::PAUSE_CONTINUE_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
+		else if (paused == 2)
+			Graphics::RenderSprite(TOC::PAUSE_TO_MENU_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
+
+		if (Audio::muted)
+			Graphics::RenderSprite(TOC::MUTE_PNG, glm::vec4(1.0f - 50.0f / 400.0f, -1.0f + 50.0f / 300.0f, 1.0f - 10.0f / 400.0f, -1.0f + 10.0f / 300.0f));
 		else
-		{
-
-		}
-		// draw /
-		// draw second number
-		
+			Graphics::RenderSprite(TOC::SOUND_PNG, glm::vec4(1.0f - 50.0f / 400.0f, -1.0f + 50.0f / 300.0f, 1.0f - 10.0f / 400.0f, -1.0f + 10.0f / 300.0f));
 
 		Graphics::Present();
 	}
