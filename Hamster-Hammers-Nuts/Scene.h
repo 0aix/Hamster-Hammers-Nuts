@@ -99,6 +99,53 @@ namespace Hamster
 		} state;
 	};
 
+	class EndlessScene : public Scene
+	{
+	public:
+		EndlessScene();
+		bool HandleInput();
+		bool Update();
+		void Render();
+
+	private:
+		bool game_over;
+		int level = 1;
+		float speed = 7.5f;
+		Object hamster;
+		Object target;
+		Object ground;
+		Object ladder;
+		Object hawk;
+		Direction direction;
+		Object* AddNut(glm::vec3 position, glm::quat rotation);
+		Object* AddLog(glm::vec3 position, glm::quat rotation);
+		std::vector<Object*> logs;
+		std::vector<Object*> nuts;
+		float gravity = 9.0f;
+		//bool on_ladder = false;
+		//bool transition = false;
+		float stun = 0.0f;
+		float windxv = 0.0f;
+		float windyv = 0.0f;
+		float windt = 0.0f;
+		int score = 0;
+		float next_drop = 1.0f;
+		float drop_interval = 1.0f;
+		enum class State
+		{
+			Idle,
+			Walking,
+			Swinging,
+			Stunned,
+			OnLadder0,
+			OnLadder1,
+			OnLadder2,
+			Falling0,
+			Falling1,
+			Hawked
+		} state;
+	};
+
 	class MainMenu : public Scene
 	{
 	public:
