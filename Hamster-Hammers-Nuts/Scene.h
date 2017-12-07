@@ -57,6 +57,7 @@ namespace Hamster
 		void Render();
 
 	private:
+		bool game_over;
 		int level = 1;
 		float speed = 7.5f;
 		Object hamster;
@@ -67,10 +68,8 @@ namespace Hamster
 		Direction direction;
 		Object* AddNut(glm::vec3 position, glm::quat rotation);
 		Object* AddLog(glm::vec3 position, glm::quat rotation);
-		Object* AddIce(glm::vec3 position);
 		std::vector<Object*> logs;
 		std::vector<Object*> nuts;
-		std::vector<Object*> ices;
 		float gravity = 9.0f;
 		//bool on_ladder = false;
 		//bool transition = false;

@@ -35,21 +35,6 @@ namespace Hamster
 		return nuts.back();
 	}
 
-	Object* StoryScene::AddIce(glm::vec3 position)
-	{
-		Object* object = new Object();
-		object->velocity = glm::vec3(0.0f);
-		object->transform.position = position;
-		object->transform.scale = glm::vec3(1.0f);
-		object->height = 0.5f;
-		object->length = 0.5f;
-		object->width = 0.5f;
-		object->mesh = Mesh(TOC::ICE_MESH);
-		object->animated = false;
-		ices.push_back(object);
-		return ices.back();
-	}
-
 	Object* StoryScene::AddLog(glm::vec3 position, glm::quat rotation)
 	{
 		Object* object = new Object();
@@ -95,7 +80,7 @@ namespace Hamster
 
 		ladder.mesh = Mesh(TOC::LADDER_MESH);
 
-		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_FLAP_ANIM);
+		hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
 		//hawk.anim = Animation(TOC::ARMATURE_SKN, TOC::ARMATURE_DASH_ANIM);
 		hawk.anim.mesh.emplace_back(TOC::ARMATURE_BODY_MESH);
 		hawk.animated = true;
@@ -344,7 +329,7 @@ namespace Hamster
 			for (auto log : logs) {
 				if (abs(log->transform.position.z - z1) <= hamster.height + log->height && state != State::Stunned) {
 					if (abs(log->transform.position.x - x1) < hamster.length + log->length && abs(log->transform.position.y - y1) < hamster.width + log->width) {
-						hamster.velocity.x = 0.0f;
+						hamster.velocity.x = log->velocity.x;
 						hamster.velocity.y = log->velocity.y;
 					}
 				}
@@ -488,11 +473,11 @@ namespace Hamster
 			if (log->length != 1.0f && log->base_rotation.w == 1.0f) {
 				RotateObject(log, (float)-M_PI / 4.0f*elapsed*windyv, glm::vec3(1.0f, 0.0f, 0.0f));
 			}
-			if (log->length == 1.0f && log->base_rotation.w < 0.0f) {
-				RotateObject(log, (float)M_PI / 4.0f*elapsed*windxv, glm::vec3(0.0f, 1.0f, 0.0f));
-			}
 			if (log->length == 1.0f && log->base_rotation.w > 0.0f) {
-				RotateObject(log, (float)-M_PI / 4.0f*elapsed*windxv, glm::vec3(0.0f, 1.0f, 0.0f));
+				RotateObject(log, (float)M_PI / 4.0f*elapsed*windxv, glm::vec3(1.0f, 0.0f, 0.0f));
+			}
+			if (log->length == 1.0f && log->base_rotation.w < 0.0f) {
+				RotateObject(log, (float)-M_PI / 4.0f*elapsed*windxv, glm::vec3(1.0f, 0.0f, 0.0f));
 			}
 		}
 		for (auto nut : nuts) {
@@ -533,7 +518,8 @@ namespace Hamster
 			state = State::OnLadder2;
 			level += 1;
 			max_score = level * 5;
-			next_drop = 7.5f;
+			next_drop = 10.0f;
+			speed = 7.5f;
 			if (level < 4) {
 				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
 			}
@@ -543,10 +529,14 @@ namespace Hamster
 			else if (level < 10) {
 				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
 			}
-			else {
+			else if(level < 13){
 				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
 				speed = 5.0f;
 			}
+			else {
+				ground.mesh = Mesh(TOC::HOUSE_MESH);
+			}
+
 		}
 		if (hamster.transform.position.z < -30.0f && state == State::Falling0 && hamster.velocity.z < 0.0f) {
 			logs.clear();
@@ -564,7 +554,8 @@ namespace Hamster
 			hamster.transform.position.z = 50.0f;
 			level = std::max(level-1,1);
 			max_score = level * 5;
-			next_drop = 7.5f;
+			next_drop = 10.0f;
+			speed = 7.5f;
 			if (level < 4) {
 				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
 			}
@@ -574,9 +565,12 @@ namespace Hamster
 			else if (level < 10) {
 				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
 			}
-			else {
+			else if (level < 13) {
 				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
 				speed = 5.0f;
+			}
+			else {
+				ground.mesh = Mesh(TOC::HOUSE_MESH);
 			}
 		}
 		if (state == State::Falling1)
@@ -599,6 +593,8 @@ namespace Hamster
 				hamster.transform.position += glm::vec3(2.0f, 0.0f, 0.0f);
 				//ladder.transform.position = glm::vec3(30.0f, 0.0f, 50.0f);
 				ladder.velocity.z = -20.0f;
+				game_over = true;
+				//END GAME HERE SOMEHOW
 			}
 			hawk.transform.position.y = 100.0f;
 		}
