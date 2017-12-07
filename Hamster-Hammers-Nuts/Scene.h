@@ -57,6 +57,7 @@ namespace Hamster
 		void Render();
 
 	private:
+		bool game_over;
 		int level = 1;
 		float speed = 7.5f;
 		Object hamster;

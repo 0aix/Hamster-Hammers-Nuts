@@ -518,7 +518,7 @@ namespace Hamster
 			state = State::OnLadder2;
 			level += 1;
 			max_score = level * 5;
-			next_drop = 7.5f;
+			next_drop = 10.0f;
 			speed = 7.5f;
 			if (level < 4) {
 				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
@@ -529,10 +529,14 @@ namespace Hamster
 			else if (level < 10) {
 				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
 			}
-			else {
+			else if(level < 13){
 				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
 				speed = 5.0f;
 			}
+			else {
+				ground.mesh = Mesh(TOC::HOUSE_MESH);
+			}
+
 		}
 		if (hamster.transform.position.z < -30.0f && state == State::Falling0 && hamster.velocity.z < 0.0f) {
 			logs.clear();
@@ -550,7 +554,7 @@ namespace Hamster
 			hamster.transform.position.z = 50.0f;
 			level = std::max(level-1,1);
 			max_score = level * 5;
-			next_drop = 7.5f;
+			next_drop = 10.0f;
 			speed = 7.5f;
 			if (level < 4) {
 				ground.mesh = Mesh(TOC::GROUND_SPRING_MESH);
@@ -561,9 +565,12 @@ namespace Hamster
 			else if (level < 10) {
 				ground.mesh = Mesh(TOC::GROUND_FALL_MESH);
 			}
-			else {
+			else if (level < 13) {
 				ground.mesh = Mesh(TOC::GROUND_WINTER_MESH);
 				speed = 5.0f;
+			}
+			else {
+				ground.mesh = Mesh(TOC::HOUSE_MESH);
 			}
 		}
 		if (state == State::Falling1)
@@ -586,6 +593,8 @@ namespace Hamster
 				hamster.transform.position += glm::vec3(2.0f, 0.0f, 0.0f);
 				//ladder.transform.position = glm::vec3(30.0f, 0.0f, 50.0f);
 				ladder.velocity.z = -20.0f;
+				game_over = true;
+				//END GAME HERE SOMEHOW
 			}
 			hawk.transform.position.y = 100.0f;
 		}
