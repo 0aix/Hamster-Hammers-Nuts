@@ -76,7 +76,9 @@ namespace Hamster
 		}
 		else if (time > 5.0f)
 		{
-
+			Audio::Play(TOC::BGM_OGG);
+			Game::NextScene(new MainMenu());
+			return false;
 		}
 		RotateDirection(&hawk, Direction::Right);
 
