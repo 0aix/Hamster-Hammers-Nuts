@@ -10,9 +10,13 @@ namespace Glommer
 		static List<string> meshTOC = new List<string>();
 		static List<string> sknTOC = new List<string>();
 		static List<string> animTOC = new List<string>();
-		static int total_vertex_count = 0;
+        static List<string> pngTOC = new List<string>();
+        static List<string> oggTOC = new List<string>();
+        static int total_vertex_count = 0;
 		static int total_bone_count = 0;
 		static int total_xf_count = 0;
+        static int total_png_size = 0;
+        static int total_ogg_size = 0;
 
 		static void Main(string[] args)
 		{
@@ -146,7 +150,77 @@ namespace Glommer
 			hamster.Flush();
 			anims.Close();
 
-			hamster.Close();
+            MemoryStream texturebuffer = new MemoryStream();
+            MemoryStream textures = new MemoryStream();
+
+            // TEXTURE_BUFFER
+            foreach (string s in Directory.EnumerateFiles(root + "\\textures"))
+            {
+                FileInfo fi = new FileInfo(s);
+                if (fi.Extension.Equals(".png"))
+                {
+                    Console.WriteLine("Writing " + fi.Name);
+
+                    byte[] buffer = new byte[fi.Length];
+                    using (FileStream ifs = fi.OpenRead())
+                        ifs.Read(buffer, 0, buffer.Length);
+
+                    texturebuffer.Write(buffer, 0, buffer.Length);
+                    texturebuffer.Flush();
+                    textures.Write(BitConverter.GetBytes(total_png_size), 0, 4);
+                    textures.Write(BitConverter.GetBytes(buffer.Length), 0, 4);
+                    textures.Flush();
+                    total_png_size += buffer.Length;
+                    pngTOC.Add(fi.Name.Replace('.', '_').ToUpperInvariant());
+                }
+            }
+            hamster.Write(BitConverter.GetBytes(total_png_size), 0, 4);
+            hamster.Write(texturebuffer.ToArray(), 0, (int)texturebuffer.Length);
+            hamster.Flush();
+            texturebuffer.Close();
+
+            // TEXTURE
+            hamster.Write(BitConverter.GetBytes(pngTOC.Count), 0, 4);
+            hamster.Write(textures.ToArray(), 0, (int)textures.Length);
+            hamster.Flush();
+            textures.Close();
+
+            MemoryStream soundbuffer = new MemoryStream();
+            MemoryStream sounds = new MemoryStream();
+
+            // SOUND_BUFFER
+            foreach (string s in Directory.EnumerateFiles(root + "\\sounds"))
+            {
+                FileInfo fi = new FileInfo(s);
+                if (fi.Extension.Equals(".ogg"))
+                {
+                    Console.WriteLine("Writing " + fi.Name);
+
+                    byte[] buffer = new byte[fi.Length];
+                    using (FileStream ifs = fi.OpenRead())
+                        ifs.Read(buffer, 0, buffer.Length);
+
+                    soundbuffer.Write(buffer, 0, buffer.Length);
+                    soundbuffer.Flush();
+                    sounds.Write(BitConverter.GetBytes(total_ogg_size), 0, 4);
+                    sounds.Write(BitConverter.GetBytes(buffer.Length), 0, 4);
+                    sounds.Flush();
+                    total_ogg_size += buffer.Length;
+                    oggTOC.Add(fi.Name.Replace('.', '_').ToUpperInvariant());
+                }
+            }
+            hamster.Write(BitConverter.GetBytes(total_ogg_size), 0, 4);
+            hamster.Write(soundbuffer.ToArray(), 0, (int)soundbuffer.Length);
+            hamster.Flush();
+            soundbuffer.Close();
+
+            // SOUND
+            hamster.Write(BitConverter.GetBytes(oggTOC.Count), 0, 4);
+            hamster.Write(sounds.ToArray(), 0, (int)sounds.Length);
+            hamster.Flush();
+            sounds.Close();
+
+            hamster.Close();
 
 			Console.WriteLine("Writing TOC.h");
 
@@ -169,7 +243,17 @@ namespace Glommer
 				string entry = "\t\tconst unsigned int " + animTOC[i] + " = " + i + ";\n";
 				TOC.Write(Encoding.UTF8.GetBytes(entry), 0, entry.Length);
 			}
-			TOC.Write(Encoding.UTF8.GetBytes("\t}\n}"), 0, 4);
+            for (int i = 0; i < pngTOC.Count; i++)
+            {
+                string entry = "\t\tconst unsigned int " + pngTOC[i] + " = " + i + ";\n";
+                TOC.Write(Encoding.UTF8.GetBytes(entry), 0, entry.Length);
+            }
+            for (int i = 0; i < oggTOC.Count; i++)
+            {
+                string entry = "\t\tconst unsigned int " + oggTOC[i] + " = " + i + ";\n";
+                TOC.Write(Encoding.UTF8.GetBytes(entry), 0, entry.Length);
+            }
+            TOC.Write(Encoding.UTF8.GetBytes("\t}\n}"), 0, 4);
 			TOC.Flush();
 			TOC.Close();
 

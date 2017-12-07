@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GL.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <vector>
@@ -10,38 +11,46 @@ namespace Hamster
 	{
 		Mesh() {}
 		Mesh(unsigned int meshID);
-		Mesh(unsigned int meshID, unsigned int sknID, unsigned int animID, bool repeat = true);
 
-		void Play(unsigned int animID, bool repeat = true, bool cont = true);
-		void Update(float elapsed);
-
-		// Mesh
 		int vertex_start;
 		int vertex_count;
+		GLuint texture;
+	};
+
+	enum class AnimationState
+	{
+		PLAYING,
+		REPEAT,
+		FINISHED
+	};
+
+	struct Animation
+	{
+		Animation() {};
+		Animation(unsigned int sknID, unsigned int animID, bool repeat = true, float factor = 1.0f);
+
+		void Play(unsigned int animID, bool repeat = true, bool cont = true, float factor = 1.0f);
+		void Update(float elapsed);
+
+		// Meshes
+		std::vector<Mesh> mesh;
+
 		// Skeleton
 		int bone_start;
 		int bone_count;
+
 		// Animation
 		int frame_start;
 		int frame_count;
 		int frame_number;
 		float frame_time;
+		float elapsed_factor;
+
 		std::vector<glm::mat4x3> bone_to_world;
 		std::vector<glm::mat4x3> bind_to_world;
-		unsigned int anim;
-		bool animated;
-		bool repeating;
-		bool finished;
-	};
 
-	struct Vertex
-	{
-		glm::vec3 position;
-		glm::vec3 normal;
-		glm::vec3 color;
-		glm::vec2 uv;
-		glm::vec4 weights;
-		glm::uvec4 indices;
+		AnimationState state;
+		unsigned int anim;
 	};
 
 	struct Bone

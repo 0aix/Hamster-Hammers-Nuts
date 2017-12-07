@@ -24,9 +24,6 @@ if len(args) == 0:
 mesh_names = dict()
 mesh_action_names = dict()
 
-bone_data = b''
-bone_name_to_idx = dict()
-
 #write bind pose info for bone, return packed index:
 def write_bone(bone):
 	global bone_data
@@ -50,6 +47,12 @@ def write_bone(bone):
 
 for arg in args:
 	bpy.ops.wm.open_mainfile(filepath=arg)
+
+	# test
+	for poly in bpy.context.object.data.polygons:
+		poly.use_smooth = True
+
+	armatures = dict()
 	for obj in bpy.data.objects:
 		#check if obj has a mesh
 		if obj.data.name not in bpy.data.meshes:
@@ -58,6 +61,14 @@ for arg in args:
 		#data contains vertex and normal data from the meshes:
 		data = b''
 		obj_name = obj.name.lower()
+
+		armature = obj.find_armature()
+
+		if armature != None:
+			armature.data = armature.data.copy()
+			armature.data.pose_position = 'POSE'
+			armatures[armature.name.lower()] = armature
+			obj_name = armature.name.lower() + '_' + obj_name
 
 		print(obj_name)
 
@@ -76,77 +87,6 @@ for arg in args:
 		obj.select = True
 		bpy.context.scene.objects.active = obj
 
-		armature = obj.find_armature()
-		if armature != None:
-			armature.data = armature.data.copy()
-
-			bone_data = b''
-			bone_name_to_idx = dict()
-			for bone in armature.data.bones:
-				write_bone(bone)
-
-			assert(len(bone_name_to_idx) * (4 + 3 * 4 + 3 * 4 + 3 * 4 + 3 * 4) == len(bone_data))
-			outfile = open('skeletons/' + obj_name + '.skn', 'wb')
-			outfile.write(struct.pack('I', len(bone_name_to_idx)))
-			outfile.write(bone_data)
-			outfile.close()
-
-			idx_to_bone_name = [-1] * len(bone_name_to_idx)
-			for kv in bone_name_to_idx.items():
-				idx = struct.unpack('i', kv[1])[0]
-				assert(idx_to_bone_name[idx] == -1)
-				idx_to_bone_name[idx] = kv[0]
-
-			for action in bpy.data.actions:
-				action_data = b''
-				action_name = obj_name + '_' + action.name.lower()
-
-				if action_name in mesh_action_names:
-					input('Error:' + action_name + ' appears in ' + mesh_action_names[action_name] + ' and ' + arg)
-					exit(1)
-				mesh_action_names[action_name] = arg
-
-				armature.animation_data.action = action
-				first = round(action.frame_range[0])
-				last = round(action.frame_range[1])
-
-				frame_data = b''
-				frame_count = 0
-				for frame in range(first, last + 1):
-					bpy.context.scene.frame_set(frame, 0.0) #note: second param is sub-frame
-					frame_count += 1
-					for name in idx_to_bone_name:
-						pose_bone = armature.pose.bones[name]
-						if pose_bone.parent != None:
-							to_parent = pose_bone.parent.matrix.copy()
-							to_parent.invert()
-							local_to_parent = to_parent * pose_bone.matrix
-						else:
-							local_to_parent = armature.matrix_world.copy() * pose_bone.matrix
-
-						trs = local_to_parent.decompose()
-						frame_data += struct.pack('fff', trs[0].x, trs[0].y, trs[0].z)
-						frame_data += struct.pack('ffff', trs[1].x, trs[1].y, trs[1].z, trs[1].w)
-						frame_data += struct.pack('fff', trs[2].x, trs[2].y, trs[2].z)
-
-				assert(frame_count * (3 * 4 + 4 * 4 + 3 * 4) * len(idx_to_bone_name) == len(frame_data))
-				outfile = open('animations/' + action_name + '.anim', 'wb')
-				outfile.write(struct.pack('I', frame_count))
-				outfile.write(struct.pack('I', len(idx_to_bone_name)))
-				outfile.write(frame_data)
-				outfile.close()
-
-		if armature != None:
-			armature.data.pose_position = 'REST'
-			bpy.context.scene.update()
-			#mesh = obj.to_mesh(bpy.context.scene, True, 'RENDER')
-			#bm = bmesh.new()
-			#bm.from_mesh(mesh)
-			#bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method=3, ngon_method=1)
-			#bm.to_mesh(mesh)
-			#bm.free()
-			#armature.data.pose_position = 'POSE'
-		#else:
 		#subdivide object's mesh into triangles:
 		bpy.ops.object.mode_set(mode='EDIT')
 		bpy.ops.mesh.select_all(action='SELECT')
@@ -154,33 +94,27 @@ for arg in args:
 		bpy.ops.object.mode_set(mode='OBJECT')
 		mesh = obj.data
 
-		if armature != None:
-			armature.data.pose_position = 'POSE'
-
-		#compute normals (respecting face smoothing):
-		#if armature == None:
-		#	mesh = obj.data
-		#if armature != None:
-		#	mesh = obj.to_mesh(bpy.context.scene, True, 'RENDER')
-
+		#compute normals (respect face smoothing)
 		mesh.calc_normals_split()
 
-		colors = None
 		if len(mesh.vertex_colors) != 0:
 			colors = mesh.vertex_colors.active.data
+		else:
+			colors = None
 
-		uvs = None
 		if len(mesh.uv_layers) != 0:
 			uvs = mesh.uv_layers.active.data
+		else:
+			uvs = None
 
-		xf = mathutils.Matrix()
-		#decompose and apply scale but not translation?
-		#xf = obj.matrix_world.copy()
 		if armature != None:
 			obj_to_arm = armature.matrix_world.copy()
 			obj_to_arm.invert()
 			obj_to_arm = obj_to_arm * obj.matrix_world
 			xf = obj_to_arm
+		else:
+			xf = mathutils.Matrix()
+		#xf = obj.matrix_world.copy()
 
 		itxf = xf.copy()
 		itxf.transpose()
@@ -214,36 +148,6 @@ for arg in args:
 				if armature != None:
 					bone_weights = []
 					for g in vertex.groups:
-						group_name = obj.vertex_groups[g.group].name
-						assert(group_name in bone_name_to_idx)
-						bone_weights.append([g.weight, group_name])
-					bone_weights.sort()
-					bone_weights.reverse()
-					if len(bone_weights) > 4:
-						print("WARNING: clamping vertex with weights:")
-						for bw in bone_weights:
-							print("  " + str(bw[0]) + " for '" + bw[1] + "'")
-						#trim and normalize remaining weights:
-						bone_weights = bone_weights[0:4]
-						total = 0.0
-						for bw in bone_weights:
-							total += bw[0]
-						for bw in bone_weights:
-							bw[0] /= total
-					if len(bone_weights) == 0:
-						print("WARNING: vertex with no bone weights.")
-
-					while len(bone_weights) < 4:
-						bone_weights.append([0, idx_to_bone_name[0]])
-
-					for bw in bone_weights:
-						data += struct.pack('f', bw[0])
-
-					for bw in bone_weights:
-						data += bone_name_to_idx[bw[1]]
-					'''
-					bone_weights = []
-					for g in vertex.groups:
 						bone_weights.append([g.weight, g.group])
 
 					bone_weights.sort()
@@ -271,13 +175,70 @@ for arg in args:
 						data += struct.pack('f', bw[0])
 					for bw in bone_weights:
 						data += struct.pack('I', bw[1])
-					'''
 				else:
 					data += struct.pack('ffff', 0, 0, 0, 0)
 					data += struct.pack('IIII', 0, 0, 0, 0)
-			#assert(3 * 4 + 3 * 4 + 3 * 4 + 2 * 4 + 4 * 4 + 4 * 4 == len(data))
+			assert(3 * (3 * 4 + 3 * 4 + 3 * 4 + 2 * 4 + 4 * 4 + 4 * 4) == len(data))
 			outfile.write(data)		
 
 		outfile.close()
+
+	for arm_name in armatures:
+		armature = armatures[arm_name]
+		bone_data = b''
+		bone_name_to_idx = dict()
+		for bone in armature.data.bones:
+			write_bone(bone)
+
+		assert(len(bone_name_to_idx) * (4 + 3 * 4 + 3 * 4 + 3 * 4 + 3 * 4) == len(bone_data))
+		outfile = open('skeletons/' + arm_name + '.skn', 'wb')
+		outfile.write(struct.pack('I', len(bone_name_to_idx)))
+		outfile.write(bone_data)
+		outfile.close()
+
+		idx_to_bone_name = [-1] * len(bone_name_to_idx)
+		for kv in bone_name_to_idx.items():
+			idx = struct.unpack('i', kv[1])[0]
+			assert(idx_to_bone_name[idx] == -1)
+			idx_to_bone_name[idx] = kv[0]
+
+		for action in bpy.data.actions:
+			action_data = b''
+			action_name = arm_name + '_' + action.name.lower()
+
+			if action_name in mesh_action_names:
+				input('Error:' + action_name + ' appears in ' + mesh_action_names[action_name] + ' and ' + arg)
+				exit(1)
+			mesh_action_names[action_name] = arg
+
+			armature.animation_data.action = action
+			first = round(action.frame_range[0])
+			last = round(action.frame_range[1])
+
+			frame_data = b''
+			frame_count = 0
+			for frame in range(first, last + 1):
+				bpy.context.scene.frame_set(frame, 0.0) #note: second param is sub-frame
+				frame_count += 1
+				for name in idx_to_bone_name:
+					pose_bone = armature.pose.bones[name]
+					if pose_bone.parent != None:
+						to_parent = pose_bone.parent.matrix.copy()
+						to_parent.invert()
+						local_to_parent = to_parent * pose_bone.matrix
+					else:
+						local_to_parent = armature.matrix_world.copy() * pose_bone.matrix
+
+					trs = local_to_parent.decompose()
+					frame_data += struct.pack('fff', trs[0].x, trs[0].y, trs[0].z)
+					frame_data += struct.pack('ffff', trs[1].x, trs[1].y, trs[1].z, trs[1].w)
+					frame_data += struct.pack('fff', trs[2].x, trs[2].y, trs[2].z)
+
+			assert(frame_count * (3 * 4 + 4 * 4 + 3 * 4) * len(idx_to_bone_name) == len(frame_data))
+			outfile = open('animations/' + action_name + '.anim', 'wb')
+			outfile.write(struct.pack('I', frame_count))
+			outfile.write(struct.pack('I', len(idx_to_bone_name)))
+			outfile.write(frame_data)
+			outfile.close()
 
 input('done')

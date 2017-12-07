@@ -10,11 +10,13 @@ namespace Hamster
 {
 	namespace Assets
 	{
-		Asset* meshes;
-		Asset* skeletons;
-		Asset* anims;
+		Entry* meshes;
+		Entry* skeletons;
+		Entry* anims;
 		Bone* bones;
 		PoseBone* posebones;
+		GLuint* textures;
+		Sound* sounds;
 
 		bool LoadAssets(char* name)
 		{
@@ -44,8 +46,8 @@ namespace Hamster
 
 			// MESH
 			ifs.read((char*)&size, 4);
-			meshes = new Asset[size];
-			ifs.read((char*)meshes, size * sizeof(Asset));
+			meshes = new Entry[size];
+			ifs.read((char*)meshes, size * sizeof(Entry));
 
 			// SKN_BUFFER
 			ifs.read((char*)&size, 4);
@@ -54,8 +56,8 @@ namespace Hamster
 
 			// SKN
 			ifs.read((char*)&size, 4);
-			skeletons = new Asset[size];
-			ifs.read((char*)skeletons, size * sizeof(Asset));
+			skeletons = new Entry[size];
+			ifs.read((char*)skeletons, size * sizeof(Entry));
 
 			// ANIM_BUFFER
 			ifs.read((char*)&size, 4);
@@ -64,8 +66,41 @@ namespace Hamster
 
 			// ANIM
 			ifs.read((char*)&size, 4);
-			anims = new Asset[size];
-			ifs.read((char*)anims, size * sizeof(Asset));
+			anims = new Entry[size];
+			ifs.read((char*)anims, size * sizeof(Entry));
+
+			// TEXTURE_BUFFER
+			ifs.read((char*)&size, 4);
+			char* buffer = new char[size];
+			ifs.read(buffer, size);
+
+			// TEXTURE
+			ifs.read((char*)&size, 4);
+			Entry* pngs = new Entry[size];
+			ifs.read((char*)pngs, size * sizeof(Entry));
+			textures = new GLuint[size];
+			for (int i = 0; i < size; i++)
+				textures[i] = Graphics::LoadTexture(&buffer[pngs[i].start], pngs[i].count);
+			delete[] buffer;
+			delete[] pngs;
+
+			// SOUND_BUFFER
+			ifs.read((char*)&size, 4);
+			buffer = new char[size];
+			ifs.read(buffer, size);
+
+			// SOUND
+			ifs.read((char*)&size, 4);
+			Entry* oggs = new Entry[size];
+			ifs.read((char*)oggs, size * sizeof(Entry));
+			sounds = new Sound[size];
+			for (int i = 0; i < size; i++)
+			{
+				if (i == TOC::BGM_OGG)
+					Audio::LoadMusic(&sounds[i], &buffer[oggs[i].start], oggs[i].count);
+				else
+					Audio::LoadChunk(&sounds[i], &buffer[oggs[i].start], oggs[i].count);
+			}
 
 			ifs.close();
 			return true;

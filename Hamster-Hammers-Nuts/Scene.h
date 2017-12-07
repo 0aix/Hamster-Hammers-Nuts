@@ -13,42 +13,39 @@ namespace Hamster
 		Left,
 		Right,
 		Down,
-		Up
+		Up,
+		LeftDown,
+		LeftUp,
+		RightDown,
+		RightUp
 	};
 
 	class Scene
 	{
 	public:
 		Scene();
-		Object& AddObject(const std::string& name, unsigned int meshID, 
+		Object& AddObject(const std::string& name,
+						  unsigned int meshID, 
 						  glm::vec3& position, 
+						  glm::vec3& dimension,
 						  glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 
 						  glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
-		Object& AddObject(const std::string& name, unsigned int meshID, unsigned int sknID, unsigned int animID,
-						  glm::vec3& position,
-						  glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f),
-						  glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
-		void RotateObject(const std::string& name, float degrees, glm::vec3 axis);
+		void RotateObject(Object* obj, float degrees, glm::vec3 axis);
+		void RotateDirection(Object* obj, Direction direction);
 
 		virtual bool HandleInput() = 0;
 		virtual bool Update() = 0;
 		virtual void Render() = 0;
 
 	protected:
-		GLint basic_mvp;
-		GLint basic_itmv;
-		GLint basic_to_light;
-		GLint animated_mvp;
-		GLint animated_bones;
-		GLint animated_to_light;
-
 		std::chrono::time_point<std::chrono::steady_clock> current_time;
 		std::chrono::time_point<std::chrono::steady_clock> previous_time;
 		float elapsed;
 
 		Camera camera;
 
-		std::unordered_map<std::string, Object> objects = std::unordered_map<std::string, Object>();
+		//std::unordered_map<std::string, Object> objects = std::unordered_map<std::string, Object>();
+		std::vector<Object> objects;
 	};
 
 	class StoryScene : public Scene
@@ -60,77 +57,132 @@ namespace Hamster
 		void Render();
 
 	private:
-		glm::vec3 hammer_offset = glm::vec3(-1.0f, -1.0f, 0.5f);
-		glm::vec3 center = glm::vec3(0.0f);
-		bool on_ladder = false;
-		bool fell = false;
-		bool has_hawk = false;
-		float hawk_time;
-		float hxv;
-		float hyv;
-		float hzv = 0.0f;
-		int max = 5;
+		bool game_over;
+		float windv = 2.5f;
+		int level = 1;
+		float speed = 7.5f;
+		Object hamster;
+		Object target;
+		Object indicator;
+		Object ground;
+		Object ladder;
+		Object hawk;
+		Direction direction;
+		Object* AddNut(glm::vec3 position, glm::quat rotation);
+		Object* AddLog(glm::vec3 position, glm::quat rotation);
+		std::vector<Object*> logs;
+		std::vector<Object*> nuts;
+		float gravity;
+		int max_score = 5;
 		float stun = 0.0f;
-		float windv = 0.0f;
+		float windxv = 0.0f;
+		float windyv = 0.0f;
 		float windt = 0.0f;
 		int score = 0;
-		float xv;
-		float yv;
-		float zv = 0.0f;
-		float hv;
-		float hd;
-		float next_drop = 5.0f;
-		int nut_count = 0;
-		int log_count = 0;
-		int ground_count = 0;
-		int wall_count = 0;
-		Direction direction;
+		float next_drop = 1.0f;
+		float drop_interval = 1.0f;
+		bool hawkstrike = false;
+		int paused = 0;
+		float whiteout = 0.0f;
+		float skyoffset = 0.0f;
+		float hawk_pos;
 
-		Object nutcounter;
+		enum class State
+		{
+			Idle,
+			Walking,
+			Swinging,
+			Stunned,
+			OnLadder0,
+			OnLadder1,
+			OnLadder2,
+			Falling0,
+			Falling1,
+			Hawked
+		} state;
 	};
 
-	class StoryScene2 : public Scene
+	class EndlessScene : public Scene
 	{
 	public:
-		StoryScene2();
+		EndlessScene();
+		bool HandleInput();
+		bool Update();
+		void Render();
+
+	private:
+		float transition_time = 20.0f;
+		float windv = 2.5f;
+		bool game_over;
+		int level = 1;
+		float speed = 7.5f;
+		Object hamster;
+		Object target;
+		Object indicator;
+		Object ground;
+		Object hawk;
+		Direction direction;
+		Object* AddNut(glm::vec3 position, glm::quat rotation);
+		Object* AddLog(glm::vec3 position, glm::quat rotation);
+		std::vector<Object*> logs;
+		std::vector<Object*> nuts;
+		float gravity;
+		float stun = 0.0f;
+		float windxv = 0.0f;
+		float windyv = 0.0f;
+		float windt = 0.0f;
+		int score = 0;
+		int max_score = 0;
+		float next_drop = 1.0f;
+		float drop_interval = 1.0f;
+		bool hawkstrike = false;
+		int paused = 0;
+		float whiteout = 0.0f;
+		float skyoffset = 0.0f;
+		float hawk_pos;
+
+		enum class State
+		{
+			Idle,
+			Walking,
+			Swinging,
+			Stunned,
+			OnLadder0,
+			OnLadder1,
+			OnLadder2,
+			Falling0,
+			Falling1,
+			Hawked
+		} state;
+	};
+
+	class EndScene : public Scene
+	{
+	public:
+		EndScene(int score);
 		bool HandleInput();
 		bool Update();
 		void Render();
 
 	private:
 		Object hamster;
-		Object eyes;
-		Object hammer;
-		std::list<Object> nuts;
-		std::list<Object> logs;
+		Object hawk;
+		int max_score;
+		float time = 0.0f;
+		float skyoffset = 0.0f;
+	};
 
-		bool swinging = false;
-		bool gettingready = false;
+	class MainMenu : public Scene
+	{
+	public:
+		MainMenu();
+		bool HandleInput();
+		bool Update();
+		void Render();
 
-		glm::vec3 hammer_offset = glm::vec3(0.0f, 0.0f, 0.5f);
-		glm::vec3 center = glm::vec3(0.0f);
-		bool on_ladder = false;
-		bool fell = false;
-		bool has_hawk = false;
-		float hawk_time;
-		float hxv;
-		float hyv;
-		float hzv = 0.0f;
-		int max = 5;
-		float stun = 0.0f;
-		float windv = 0.0f;
-		float windt = 0.0f;
-		int score = 0;
-		float xv;
-		float yv;
-		float zv = 0.0f;
-		float hv;
-		float hd;
-		float next_drop = 5.0f;
-		int nut_count = 0;
-		int log_count = 0;
-		Direction direction;
-
-		Object nutcounter;
+	private:
+		int selection;
+		bool howtoplay;
+		bool render;
 	};
 }

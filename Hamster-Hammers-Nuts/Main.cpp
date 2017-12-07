@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Assets.h"
+#include "Audio.h"
 #include "Graphics.h"
 using namespace Hamster;
 
@@ -7,19 +8,21 @@ using namespace Hamster;
 #define WINDOW_NAME "Hamster Hammers Nuts"
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
+// ^hard-coded everywhere =/
 
 int main(int argc, char** args)
 {
 	if (!Graphics::Initialize(WINDOW_NAME, WINDOW_WIDTH, WINDOW_HEIGHT))
-		return -1;
+		return 1;
+	if (!Audio::Initialize())
+		return 2;
 	if (!Assets::LoadAssets(ASSETS_NAME))
-		return -1;
+		return 3;
 
 	if (Game::Initialize())
 		while (Game::is_running)
 			Game::Update();
 
 	Graphics::Uninitialize();
-
 	return 0;
 }
