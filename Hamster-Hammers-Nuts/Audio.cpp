@@ -1,15 +1,11 @@
 #include "Audio.h"
 #include "Assets.h"
 #include <SDL.h>
-#include <SDL_mixer.h>
 
 namespace Hamster
 {
 	namespace Audio
 	{
-		Mix_Music* music = NULL;
-		SDL_RWops* rw = NULL;
-
 		bool Initialize()
 		{
 			SDL_InitSubSystem(SDL_INIT_AUDIO);
@@ -20,15 +16,41 @@ namespace Hamster
 			return true;
 		}
 
-		void PlayMusic(unsigned int oggID)
+		void LoadMusic(Sound* sound, char* data, int size)
 		{
-			rw = SDL_RWFromMem(&Assets::oggbuffer[Assets::oggs[TOC::HB_OGG].start], Assets::oggs[TOC::HB_OGG].count);
-			if (rw)
-			{
-				music = Mix_LoadMUS_RW(rw, 1);
-				if (music)
-					Mix_PlayMusic(music, -1);
-			}
+			SDL_RWops* rw = SDL_RWFromMem(data, size);
+			if (rw != NULL)
+				sound->music = Mix_LoadMUS_RW(rw, 1);
+		}
+
+		void LoadChunk(Sound* sound, char* data, int size)
+		{
+			SDL_RWops* rw = SDL_RWFromMem(data, size);
+			if (rw != NULL)
+				sound->chunk = Mix_LoadWAV_RW(rw, 1);
+		}
+
+		void Play(unsigned int oggID)
+		{
+			if (Assets::sounds[oggID].music)
+				Mix_PlayMusic(Assets::sounds[oggID].music, -1);
+			else if (Assets::sounds[oggID].chunk)
+				Mix_PlayChannel(-1, Assets::sounds[oggID].chunk, 0);
+		}
+
+		void HaltChannels()
+		{
+			Mix_HaltChannel(-1);
+		}
+
+		void PauseChannels()
+		{
+			Mix_Pause(-1);
+		}
+
+		void ResumeChannels()
+		{
+			Mix_Resume(-1);
 		}
 	}
 }

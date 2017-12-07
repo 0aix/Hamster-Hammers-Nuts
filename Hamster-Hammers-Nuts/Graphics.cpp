@@ -220,6 +220,7 @@ namespace Hamster
 
 			SDL_GL_DeleteContext(context);
 			SDL_DestroyWindow(window);
+			SDL_Quit();
 		}
 
 		void LoadBufferData(void* data, int size)
