@@ -18,13 +18,10 @@ int main(int argc, char** args)
 	if (!Assets::LoadAssets(ASSETS_NAME))
 		return 3;
 
-	Audio::PlayMusic(TOC::HB_OGG);
-
 	if (Game::Initialize())
 		while (Game::is_running)
 			Game::Update();
 
 	Graphics::Uninitialize();
-	SDL_Quit();
 	return 0;
 }

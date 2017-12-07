@@ -8,6 +8,7 @@ namespace Hamster
 	{
 		selection = 0;
 		howtoplay = false;
+		render = true;
 	}
 
 	bool MainMenu::HandleInput()
@@ -50,37 +51,40 @@ namespace Hamster
 
 	bool MainMenu::Update()
 	{
-		// Idk what to stick here tbh
+		// Keep the FPS at 60 instead of max
+		current_time = std::chrono::high_resolution_clock::now();
+		elapsed += std::chrono::duration<float>(current_time - previous_time).count();
+		previous_time = current_time;
+		if (elapsed >= 1.0f / 60.0f)
+		{
+			elapsed -= 1.0f / 60.0f;
+			render = true;
+		}
 		return true;
 	}
 	
 	void MainMenu::Render()
 	{
-		Graphics::BeginSprite();
+		if (!render)
+			return;
+		render = false;
 
-		// Draw background
+		Graphics::BeginSprite();
 
 		if (!howtoplay)
 		{
-			// Draw title
-			// some array
-			switch (selection)
-			{
-			case 0:
-				break;
-			case 1:
-				break;
-			case 2:
-				break;
-			case 3:
-				break;
-			}
+			if (selection == 0)
+				Graphics::RenderSprite(TOC::MENU_STORY_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+			else if (selection == 1)
+				Graphics::RenderSprite(TOC::MENU_ENDLESS_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+			else if (selection == 2)
+				Graphics::RenderSprite(TOC::MENU_HOW_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+			else if (selection == 3)
+				Graphics::RenderSprite(TOC::MENU_QUIT_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
 		}
 		else
-		{
-			// Draw how to play title
-			// Draw instructions
-			// Draw
-		}
+			Graphics::RenderSprite(TOC::INSTRUCTION_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+
+		Graphics::Present();
 	}
 }

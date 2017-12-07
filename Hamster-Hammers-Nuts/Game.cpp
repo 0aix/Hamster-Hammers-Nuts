@@ -1,4 +1,6 @@
 #include "Game.h"
+#include "Audio.h"
+#include "TOC.h"
 #include "Scene.h"
 #include <SDL.h>
 
@@ -13,7 +15,10 @@ namespace Hamster
 
 		bool Initialize()
 		{
+
 			scene = new EndlessScene();
+			//Audio::Play(TOC::BGM_OGG);
+			//scene = new MainMenu();
 			return true;
 		}
 

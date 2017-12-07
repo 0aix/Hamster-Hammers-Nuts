@@ -157,5 +157,6 @@ namespace Hamster
 	private:
 		int selection;
 		bool howtoplay;
+		bool render;
 	};
 }

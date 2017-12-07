@@ -13,11 +13,10 @@ namespace Hamster
 		Entry* meshes;
 		Entry* skeletons;
 		Entry* anims;
-		Entry* oggs;
 		Bone* bones;
 		PoseBone* posebones;
 		GLuint* textures;
-		char* oggbuffer;
+		Sound* sounds;
 
 		bool LoadAssets(char* name)
 		{
@@ -87,13 +86,19 @@ namespace Hamster
 
 			// SOUND_BUFFER
 			ifs.read((char*)&size, 4);
-			oggbuffer = new char[size];
-			ifs.read(oggbuffer, size);
+			buffer = new char[size];
+			ifs.read(buffer, size);
 
 			// SOUND
 			ifs.read((char*)&size, 4);
-			oggs = new Entry[size];
+			Entry* oggs = new Entry[size];
 			ifs.read((char*)oggs, size * sizeof(Entry));
+			sounds = new Sound[size];
+			for (int i = 0; i < size; i++)
+			{
+				// if (i == TOC::BGM_OGG)
+				Audio::LoadChunk(&sounds[i], &buffer[oggs[i].start], oggs[i].count);
+			}
 
 			ifs.close();
 			return true;

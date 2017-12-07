@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Audio.h"
 #include "Mesh.h"
 #include "TOC.h"
 #include "GL.hpp"
@@ -33,7 +34,7 @@ namespace Hamster
 		extern Bone* bones;
 		extern PoseBone* posebones;
 		extern GLuint* textures;
-		extern char* oggbuffer;
+		extern Sound* sounds;
 
 		bool LoadAssets(char* name);
 	}
