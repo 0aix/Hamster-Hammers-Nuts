@@ -113,6 +113,5 @@ void main()
 
 	vec4 color = texture(diffusemap, uv);
 	float intensity = min(coeff, coeffN);
-	//float intensity = coeff;
 	fragColor = vec4(color.xyz * intensity, color.w);
 }

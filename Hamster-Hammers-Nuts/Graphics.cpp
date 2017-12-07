@@ -302,8 +302,8 @@ namespace Hamster
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, &buffer[0]);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			GLenum a = glGetError();
 			return texture;
 		}
@@ -447,15 +447,16 @@ namespace Hamster
 			glBindVertexArray(spritevao);
 		}
 		
-		void RenderSprite(unsigned int textureID, glm::vec2& center, glm::vec2& size, glm::vec4& color)
+		void RenderSprite(unsigned int textureID, glm::vec4& pos, glm::vec4& uv, glm::vec4& color)
 		{
+			// lt, rb
 			static GLint sprite_tex = glGetUniformLocation(sprite, "tex");
 			Vert vertices[4] =
 			{
-				{ glm::vec2(center.x - 0.5 * size.x, center.y + 0.5 * size.y), glm::vec2(0.0f, 1.0f), color },
-				{ glm::vec2(center.x + 0.5 * size.x, center.y + 0.5 * size.y), glm::vec2(1.0f, 1.0f), color },
-				{ glm::vec2(center.x - 0.5 * size.x, center.y - 0.5 * size.y), glm::vec2(0.0f, 0.0f), color },
-				{ glm::vec2(center.x + 0.5 * size.x, center.y - 0.5 * size.y), glm::vec2(1.0f, 0.0f), color }
+				{ glm::vec2(pos.x, pos.y), glm::vec2(uv.x, uv.y), color },
+				{ glm::vec2(pos.z, pos.y), glm::vec2(uv.z, uv.y), color },
+				{ glm::vec2(pos.x, pos.w), glm::vec2(uv.x, uv.w), color },
+				{ glm::vec2(pos.z, pos.w), glm::vec2(uv.z, uv.w), color }
 			};
 			// Stream draw requires recalling glVertexAttribPointer
 			glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);

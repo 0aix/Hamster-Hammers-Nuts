@@ -648,7 +648,7 @@ namespace Hamster
 
 		// background
 		Graphics::BeginSprite();
-		Graphics::RenderSprite(TOC::SKY_PNG, glm::vec2(0.0f, 0.0f), glm::vec2(2.0f, 2.0f));
+		Graphics::RenderSprite(TOC::SKY_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
 
 		// actual scene
 		Graphics::CompositeScene();

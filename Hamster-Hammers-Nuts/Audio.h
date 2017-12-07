@@ -12,13 +12,15 @@ namespace Hamster
 
 	namespace Audio
 	{
+		extern bool muted;
+
 		bool Initialize();
 
 		void LoadMusic(Sound* sound, char* data, int size);
 		void LoadChunk(Sound* sound, char* data, int size);
 		
 		void Play(unsigned int oggID);
-		//void FadeMusic();
+		void ToggleMute();
 		
 		void HaltChannels();
 		void PauseChannels();

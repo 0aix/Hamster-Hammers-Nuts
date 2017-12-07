@@ -63,6 +63,7 @@ namespace Hamster
 		float speed = 7.5f;
 		Object hamster;
 		Object target;
+		Object indicator;
 		Object ground;
 		Object ladder;
 		Object hawk;
@@ -71,9 +72,7 @@ namespace Hamster
 		Object* AddLog(glm::vec3 position, glm::quat rotation);
 		std::vector<Object*> logs;
 		std::vector<Object*> nuts;
-		float gravity = 9.0f;
-		//bool on_ladder = false;
-		//bool transition = false;
+		float gravity;
 		int max_score = 5;
 		float stun = 0.0f;
 		float windxv = 0.0f;
@@ -82,9 +81,12 @@ namespace Hamster
 		int score = 0;
 		float next_drop = 1.0f;
 		float drop_interval = 1.0f;
-		//bool preparing = false;
+		bool hawkstrike = false;
+		int paused = 0;
+		float whiteout = 0.0f;
+		float skyoffset = 0.0f;
+		float hawk_pos;
 
-		//bool swinging = false;
 		enum class State
 		{
 			Idle,
@@ -116,6 +118,7 @@ namespace Hamster
 		float speed = 7.5f;
 		Object hamster;
 		Object target;
+		Object indicator;
 		Object ground;
 		Object hawk;
 		Direction direction;
@@ -123,7 +126,7 @@ namespace Hamster
 		Object* AddLog(glm::vec3 position, glm::quat rotation);
 		std::vector<Object*> logs;
 		std::vector<Object*> nuts;
-		float gravity = 9.0f;
+		float gravity;
 		float stun = 0.0f;
 		float windxv = 0.0f;
 		float windyv = 0.0f;
@@ -131,6 +134,9 @@ namespace Hamster
 		int score = 0;
 		float next_drop = 1.0f;
 		float drop_interval = 1.0f;
+		bool hawkstrike = false;
+		int paused = 0;
+
 		enum class State
 		{
 			Idle,

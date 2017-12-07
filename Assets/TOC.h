@@ -4,7 +4,7 @@ namespace Hamster
 {
 	namespace TOC
 	{
-		const unsigned int VERSION = 3405230110;
+		const unsigned int VERSION = 2028857463;
 		const unsigned int ARMATURE_BODY_MESH = 0;
 		const unsigned int CIRCLE_MESH = 1;
 		const unsigned int CUBE_001_MESH = 2;
@@ -37,25 +37,33 @@ namespace Hamster
 		const unsigned int HAMSTER_TOCLIMB_LIB_ANIM = 11;
 		const unsigned int HAMSTER_WALK_ANIM = 12;
 		const unsigned int HAMSTER_WALK_LIB_ANIM = 13;
-		const unsigned int CLIFF_FALL_PNG = 0;
-		const unsigned int CLIFF_SPRING_PNG = 1;
-		const unsigned int CLIFF_SUMMER_PNG = 2;
-		const unsigned int CLIFF_WINTER_PNG = 3;
-		const unsigned int GRASS_FALL_PNG = 4;
-		const unsigned int GRASS_SPRING_PNG = 5;
-		const unsigned int GRASS_SUMMER_PNG = 6;
-		const unsigned int HOUSE_PNG = 7;
-		const unsigned int ICE_PNG = 8;
-		const unsigned int INSTRUCTION_PNG = 9;
-		const unsigned int MENU_ENDLESS_PNG = 10;
-		const unsigned int MENU_HOW_PNG = 11;
-		const unsigned int MENU_QUIT_PNG = 12;
-		const unsigned int MENU_STORY_PNG = 13;
-		const unsigned int SKY_PNG = 14;
-		const unsigned int SNOW_PNG = 15;
+		const unsigned int ARROW_PNG = 0;
+		const unsigned int CLIFF_FALL_PNG = 1;
+		const unsigned int CLIFF_SPRING_PNG = 2;
+		const unsigned int CLIFF_SUMMER_PNG = 3;
+		const unsigned int CLIFF_WINTER_PNG = 4;
+		const unsigned int DIFFUSE_PNG = 5;
+		const unsigned int GRASS_FALL_PNG = 6;
+		const unsigned int GRASS_SPRING_PNG = 7;
+		const unsigned int GRASS_SUMMER_PNG = 8;
+		const unsigned int HOUSE_PNG = 9;
+		const unsigned int ICE_PNG = 10;
+		const unsigned int INSTRUCTION_PNG = 11;
+		const unsigned int MENU_ENDLESS_PNG = 12;
+		const unsigned int MENU_HOW_PNG = 13;
+		const unsigned int MENU_QUIT_PNG = 14;
+		const unsigned int MENU_STORY_PNG = 15;
+		const unsigned int MUTE_PNG = 16;
+		const unsigned int NUMBER_PNG = 17;
+		const unsigned int NUT_LINE_PNG = 18;
+		const unsigned int NUT_NO_LINE_PNG = 19;
+		const unsigned int PAUSE_CONTINUE_PNG = 20;
+		const unsigned int PAUSE_TO_MENU_PNG = 21;
+		const unsigned int SKY_PNG = 22;
+		const unsigned int SNOW_PNG = 23;
+		const unsigned int SOUND_PNG = 24;
 		const unsigned int BGM_OGG = 0;
-		const unsigned int CRACK1_OGG = 1;
-		const unsigned int CRACK2_OGG = 2;
-		const unsigned int THUNK_OGG = 3;
+		const unsigned int CRACK_OGG = 1;
+		const unsigned int HAWK_OGG = 2;
 	}
 }

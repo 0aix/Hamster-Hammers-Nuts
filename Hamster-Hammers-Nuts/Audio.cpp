@@ -6,11 +6,13 @@ namespace Hamster
 {
 	namespace Audio
 	{
+		bool muted = false;
+
 		bool Initialize()
 		{
 			SDL_InitSubSystem(SDL_INIT_AUDIO);
 
-			if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 4096) == -1)
+			if (Mix_OpenAudio(22050, MIX_DEFAULT_FORMAT, 2, 1024) == -1)
 				return false;
 
 			return true;
@@ -36,6 +38,23 @@ namespace Hamster
 				Mix_PlayMusic(Assets::sounds[oggID].music, -1);
 			else if (Assets::sounds[oggID].chunk)
 				Mix_PlayChannel(-1, Assets::sounds[oggID].chunk, 0);
+		}
+
+		void ToggleMute()
+		{
+			static int mvolume = 0;
+			static int volume = 0;
+			
+			if (muted = !muted)
+			{
+				mvolume = Mix_VolumeMusic(0);
+				volume = Mix_Volume(-1, 0);
+			}
+			else
+			{
+				mvolume = Mix_VolumeMusic(mvolume);
+				Mix_Volume(-1, volume);
+			}
 		}
 
 		void HaltChannels()

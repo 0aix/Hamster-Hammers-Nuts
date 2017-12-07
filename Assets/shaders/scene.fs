@@ -62,10 +62,19 @@ void main()
     else if (intensity > 0.50) coeff = 0.75;
     else if (intensity > 0.25) coeff = 0.50;
     else                       coeff = 0.25;
-	vec3 ambient = 0.7 * color;
-	fragColor = vec4(ambient + 0.5 * coeff * color, alpha);
+	coeff = 0.7 + 0.5 * coeff;
+	// hacks are real
 	if (alpha == 1.0)
+	{
+		fragColor = vec4(coeff * color, 1.0);
 		normalColor = vec4((norm + vec3(1.0, 1.0, 1.0)) * 0.5, 1.0);
+	}
 	else
+	{
+		if (alpha == 0.75)
+			fragColor = vec4(coeff * vec3(1.0, 0.0, 0.0), 0.8);
+		else if (alpha == 0.5)
+			fragColor = vec4(coeff * vec3(1.0, 0.4, 0.0), 0.8);
 		normalColor = vec4(0.0);
+	}
 }

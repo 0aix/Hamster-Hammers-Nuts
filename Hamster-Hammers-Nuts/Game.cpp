@@ -15,10 +15,8 @@ namespace Hamster
 
 		bool Initialize()
 		{
-
-			scene = new EndlessScene();
 			//Audio::Play(TOC::BGM_OGG);
-			//scene = new MainMenu();
+			scene = new MainMenu();
 			return true;
 		}
 
@@ -46,7 +44,10 @@ namespace Hamster
 			if (!next)
 				is_running = false;
 			else
+			{
+				delete scene;
 				scene = next;
+			}
 		}
 	}
 }

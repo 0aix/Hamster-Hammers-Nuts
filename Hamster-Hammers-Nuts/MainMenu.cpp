@@ -15,7 +15,7 @@ namespace Hamster
 	{
 		if (Game::event.type == SDL_KEYDOWN)
 		{
-			if (Game::event.key.keysym.sym == SDLK_RETURN)
+			if (Game::event.key.keysym.sym == SDLK_RETURN || Game::event.key.keysym.sym == SDLK_SPACE)
 			{
 				switch (selection)
 				{
@@ -23,7 +23,7 @@ namespace Hamster
 					Game::NextScene(new StoryScene());
 					return false;
 				case 1: // Endless
-					Game::NextScene(NULL);
+					Game::NextScene(new EndlessScene());
 					return false;
 				case 2: // How-to-play
 					howtoplay = true;
@@ -45,6 +45,18 @@ namespace Hamster
 			}
 			else if (Game::event.key.keysym.sym == SDLK_ESCAPE && howtoplay)
 				howtoplay = false;
+			else if (Game::event.key.keysym.sym == SDLK_BACKQUOTE)
+				Audio::ToggleMute();
+		}
+		if (Game::event.type == SDL_MOUSEBUTTONDOWN)
+		{
+			if (Game::event.button.button == SDL_BUTTON_LEFT)
+			{
+				float dx = Game::event.button.x - 770.0f;
+				float dy = Game::event.button.y - 570.0f;
+				if (dx * dx + dy * dy <= 400.0f)
+					Audio::ToggleMute();
+			}
 		}
 		return true;
 	}
@@ -74,16 +86,21 @@ namespace Hamster
 		if (!howtoplay)
 		{
 			if (selection == 0)
-				Graphics::RenderSprite(TOC::MENU_STORY_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+				Graphics::RenderSprite(TOC::MENU_STORY_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
 			else if (selection == 1)
-				Graphics::RenderSprite(TOC::MENU_ENDLESS_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+				Graphics::RenderSprite(TOC::MENU_ENDLESS_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
 			else if (selection == 2)
-				Graphics::RenderSprite(TOC::MENU_HOW_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+				Graphics::RenderSprite(TOC::MENU_HOW_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
 			else if (selection == 3)
-				Graphics::RenderSprite(TOC::MENU_QUIT_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+				Graphics::RenderSprite(TOC::MENU_QUIT_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
 		}
 		else
-			Graphics::RenderSprite(TOC::INSTRUCTION_PNG, glm::vec2(0.0f), glm::vec2(2.0f));
+			Graphics::RenderSprite(TOC::INSTRUCTION_PNG, glm::vec4(-1.0f, 1.0f, 1.0f, -1.0f));
+
+		if (Audio::muted)
+			Graphics::RenderSprite(TOC::MUTE_PNG, glm::vec4(1.0f - 50.0f / 400.0f, -1.0f + 50.0f / 300.0f, 1.0f - 10.0f / 400.0f, -1.0f + 10.0f / 300.0f));
+		else
+			Graphics::RenderSprite(TOC::SOUND_PNG, glm::vec4(1.0f - 50.0f / 400.0f, -1.0f + 50.0f / 300.0f, 1.0f - 10.0f / 400.0f, -1.0f + 10.0f / 300.0f));
 
 		Graphics::Present();
 	}

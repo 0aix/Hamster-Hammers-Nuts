@@ -25,7 +25,7 @@ namespace Hamster
 		void CompositeScene();
 
 		void BeginSprite();
-		void RenderSprite(unsigned int textureID, glm::vec2& center, glm::vec2& size, glm::vec4& color = glm::vec4(1.0f));
+		void RenderSprite(unsigned int textureID, glm::vec4& pos, glm::vec4& uv = glm::vec4(0.0f, 1.0f, 1.0f, 0.0f), glm::vec4& color = glm::vec4(1.0f));
 
 		void Present();
 	}
