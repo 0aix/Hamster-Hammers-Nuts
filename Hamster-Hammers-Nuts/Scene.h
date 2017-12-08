@@ -24,12 +24,13 @@ namespace Hamster
 	{
 	public:
 		Scene();
+		virtual ~Scene() { }
 		Object& AddObject(const std::string& name,
 						  unsigned int meshID, 
-						  glm::vec3& position, 
-						  glm::vec3& dimension,
-						  glm::quat& rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 
-						  glm::vec3& scale = glm::vec3(1.0f, 1.0f, 1.0f));
+						  glm::vec3 const & position, 
+						  glm::vec3 const & dimension,
+						  glm::quat const & rotation = glm::quat(1.0f, 0.0f, 0.0f, 0.0f), 
+						  glm::vec3 const & scale = glm::vec3(1.0f, 1.0f, 1.0f));
 		void RotateObject(Object* obj, float degrees, glm::vec3 axis);
 		void RotateDirection(Object* obj, Direction direction);
 
@@ -38,8 +39,8 @@ namespace Hamster
 		virtual void Render() = 0;
 
 	protected:
-		std::chrono::time_point<std::chrono::steady_clock> current_time;
-		std::chrono::time_point<std::chrono::steady_clock> previous_time;
+		std::chrono::time_point<std::chrono::high_resolution_clock> current_time;
+		std::chrono::time_point<std::chrono::high_resolution_clock> previous_time;
 		float elapsed;
 
 		Camera camera;
@@ -52,6 +53,7 @@ namespace Hamster
 	{
 	public:
 		StoryScene();
+		virtual ~StoryScene() { }
 		bool HandleInput();
 		bool Update();
 		void Render();
@@ -106,6 +108,7 @@ namespace Hamster
 	{
 	public:
 		EndlessScene();
+		virtual ~EndlessScene() { }
 		bool HandleInput();
 		bool Update();
 		void Render();
@@ -176,6 +179,7 @@ namespace Hamster
 	{
 	public:
 		MainMenu();
+		virtual ~MainMenu() { }
 		bool HandleInput();
 		bool Update();
 		void Render();

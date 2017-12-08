@@ -18,7 +18,7 @@ namespace Hamster
 		GLuint* textures;
 		Sound* sounds;
 
-		bool LoadAssets(char* name)
+		bool LoadAssets(char const * name)
 		{
 			static_assert(sizeof(Vertex) == VERTEX_SIZE, "Vertex is incorrectly packed");
 			static_assert(sizeof(Bone) == BONE_SIZE, "Bone is incorrectly packed");
@@ -79,7 +79,7 @@ namespace Hamster
 			Entry* pngs = new Entry[size];
 			ifs.read((char*)pngs, size * sizeof(Entry));
 			textures = new GLuint[size];
-			for (int i = 0; i < size; i++)
+			for (uint32_t i = 0; i < size; i++)
 				textures[i] = Graphics::LoadTexture(&buffer[pngs[i].start], pngs[i].count);
 			delete[] buffer;
 			delete[] pngs;
@@ -94,7 +94,7 @@ namespace Hamster
 			Entry* oggs = new Entry[size];
 			ifs.read((char*)oggs, size * sizeof(Entry));
 			sounds = new Sound[size];
-			for (int i = 0; i < size; i++)
+			for (uint32_t i = 0; i < size; i++)
 			{
 				if (i == TOC::BGM_OGG)
 					Audio::LoadMusic(&sounds[i], &buffer[oggs[i].start], oggs[i].count);

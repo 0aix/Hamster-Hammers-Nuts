@@ -36,6 +36,6 @@ namespace Hamster
 		extern GLuint* textures;
 		extern Sound* sounds;
 
-		bool LoadAssets(char* name);
+		bool LoadAssets(char const * name);
 	}
 }
