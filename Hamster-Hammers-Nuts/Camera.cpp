@@ -11,7 +11,7 @@ namespace Hamster
 		scale = 12.5f;
 	}
 
-	void Camera::set(float radius, float elevation, float azimuth, glm::vec3& target)
+	void Camera::set(float radius, float elevation, float azimuth, glm::vec3 const & target)
 	{
 		transform.position = radius * glm::vec3(std::cos(elevation) * std::cos(azimuth),
 			std::cos(elevation) * std::sin(azimuth),

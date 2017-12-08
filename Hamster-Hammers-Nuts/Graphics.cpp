@@ -14,7 +14,7 @@ namespace Hamster
 	{
 		struct Vert
 		{
-			Vert(glm::vec2& Position, glm::vec2& TexCoord, glm::vec4& Color) : Position(Position), TexCoord(TexCoord), Color(Color) {}
+			Vert(glm::vec2 const & Position, glm::vec2 const & TexCoord, glm::vec4 const & Color) : Position(Position), TexCoord(TexCoord), Color(Color) {}
 			glm::vec2 Position;
 			glm::vec2 TexCoord;
 			glm::vec4 Color;
@@ -53,10 +53,9 @@ namespace Hamster
 		glm::mat4 m_world_to_clip;
 		glm::mat4 m_world_to_light;
 
-		// modified https://github.com/opengl-tutorials/ogl/tree/master/common/shader.cpp
-		GLuint LoadShaders(char* vertex_file_path, char* fragment_file_path);
+		GLuint LoadShaders(char const * vertex_file_path, char const * fragment_file_path);
 
-		bool Initialize(char* name, int width, int height)
+		bool Initialize(char const * name, int width, int height)
 		{
 			// Initialize SDL library
 			SDL_Init(SDL_INIT_VIDEO);
@@ -110,10 +109,10 @@ namespace Hamster
 					std::cerr << "NOTE: couldn't set vsync (" << SDL_GetError() << ")." << std::endl;
 			}
 
-			scene = LoadShaders("shaders\\scene.vs", "shaders\\scene.fs");
-			shadow = LoadShaders("shaders\\shadow.vs", "shaders\\shadow.fs");
-			composite = LoadShaders("shaders\\composite.vs", "shaders\\composite.fs");
-			sprite = LoadShaders("shaders\\sprite.vs", "shaders\\sprite.fs");
+			scene = LoadShaders("shaders/scene.vs", "shaders/scene.fs");
+			shadow = LoadShaders("shaders/shadow.vs", "shaders/shadow.fs");
+			composite = LoadShaders("shaders/composite.vs", "shaders/composite.fs");
+			sprite = LoadShaders("shaders/sprite.vs", "shaders/sprite.fs");
 
 			// some code from http://www.opengl-tutorial.org/intermediate-tutorials/tutorial-16-shadow-mapping/
 			// The framebuffer, which regroups 0, 1, or more textures, and 0 or 1 depth buffer.
@@ -229,7 +228,7 @@ namespace Hamster
 			glGenBuffers(1, &buffer);
 			glBindBuffer(GL_ARRAY_BUFFER, buffer);
 			glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-			GLenum a = glGetError();
+			//GLenum a = glGetError();
 			glGenVertexArrays(1, &vao);
 			glBindVertexArray(vao);
 			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLbyte*)0); // Position
@@ -248,16 +247,16 @@ namespace Hamster
 
 		uint32_t m_offset = 0;
 		int m_size = 0;
-		char* m_data;
+		char const * m_data;
 		void read_data(png_struct* png_ptr, png_byte* png_data, png_size_t length)
 		{
-			if (m_offset + length > m_size)
+			if (int32_t(m_offset + length) > m_size) //awkward, why is m_size signed?
 				png_error(png_ptr, "Error reading");
 			std::memcpy(png_data, m_data + m_offset, length);
 			m_offset += length;
 		};
 
-		GLuint LoadTexture(char* data, int size)
+		GLuint LoadTexture(char const * data, int size)
 		{
 			png_struct* png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 			png_info* info = png_create_info_struct(png);
@@ -288,7 +287,7 @@ namespace Hamster
 			std::vector<unsigned int> buffer(width * height);
 
 			png_byte** row_pointers = new png_byte*[height];
-			for (int i = 0; i < height; i++)
+			for (uint32_t i = 0; i < height; i++)
 				row_pointers[height - i - 1] = (png_byte*)(&buffer[i * width]);
 
 			png_read_image(png, row_pointers);
@@ -304,11 +303,11 @@ namespace Hamster
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			GLenum a = glGetError();
+			//GLenum a = glGetError();
 			return texture;
 		}
 
-		void WorldTransforms(glm::mat4& world_to_camera, glm::mat4& world_to_clip, glm::mat4& world_to_light)
+		void WorldTransforms(glm::mat4 const & world_to_camera, glm::mat4 const & world_to_clip, glm::mat4 const & world_to_light)
 		{
 			m_world_to_camera = world_to_camera;
 			m_world_to_clip = world_to_clip;
@@ -348,7 +347,7 @@ namespace Hamster
 			}
 		}
 
-		void BeginScene(glm::vec3& to_light)
+		void BeginScene(glm::vec3 const & to_light)
 		{
 			static GLint scene_shadowmap = glGetUniformLocation(scene, "shadowmap");
 			static GLint scene_to_light = glGetUniformLocation(scene, "to_light");
@@ -447,7 +446,7 @@ namespace Hamster
 			glBindVertexArray(spritevao);
 		}
 		
-		void RenderSprite(unsigned int textureID, glm::vec4& pos, glm::vec4& uv, glm::vec4& color)
+		void RenderSprite(unsigned int textureID, glm::vec4 const & pos, glm::vec4 const & uv, glm::vec4 const & color)
 		{
 			// lt, rb
 			static GLint sprite_tex = glGetUniformLocation(sprite, "tex");
@@ -477,7 +476,7 @@ namespace Hamster
 		}
 		
 		// modified https://github.com/opengl-tutorials/ogl/tree/master/common/shader.cpp
-		GLuint LoadShaders(char* vertex_file_path, char* fragment_file_path)
+		GLuint LoadShaders(char const * vertex_file_path, char const * fragment_file_path)
 		{
 			// Create the shaders
 			GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -486,10 +485,12 @@ namespace Hamster
 			// Read the Vertex Shader code from the file
 			std::ifstream VertexShaderStream(vertex_file_path, std::ios::in | std::ios::binary);
 			std::string VertexShaderCode((std::istreambuf_iterator<char>(VertexShaderStream)), std::istreambuf_iterator<char>());
+			if (VertexShaderCode == "") throw std::runtime_error("Failed to load code from '" + std::string(vertex_file_path) + "'");
 
 			// Read the Fragment Shader code from the file
 			std::ifstream FragmentShaderStream(fragment_file_path, std::ios::in | std::ios::binary);
 			std::string FragmentShaderCode((std::istreambuf_iterator<char>(FragmentShaderStream)), std::istreambuf_iterator<char>());
+			if (FragmentShaderCode == "") throw std::runtime_error("Failed to load code from '" + std::string(fragment_file_path) + "'");
 
 			GLint Result = GL_FALSE;
 			int InfoLogLength;

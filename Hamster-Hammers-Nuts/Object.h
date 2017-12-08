@@ -37,7 +37,7 @@ namespace Hamster
 	struct Camera
 	{
 		Camera();
-		void set(float radius, float elevation, float azimuth, glm::vec3& target);
+		void set(float radius, float elevation, float azimuth, glm::vec3 const & target);
 		glm::mat4 make_projection() const;
 
 		Transform transform;

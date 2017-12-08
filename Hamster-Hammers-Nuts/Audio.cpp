@@ -50,7 +50,7 @@ namespace Hamster
 			static int mvolume = 0;
 			static int volume = 0;
 			
-			if (muted = !muted)
+			if ((muted = !muted)) //this is probably too clever
 			{
 				mvolume = Mix_VolumeMusic(0);
 				volume = Mix_Volume(-1, 0);
