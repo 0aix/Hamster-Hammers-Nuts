@@ -11,7 +11,7 @@ namespace Hamster
 		elapsed = 0.0f;
 	}
 
-	Object& Scene::AddObject(const std::string& name, unsigned int meshID, glm::vec3& position, glm::vec3& dimension, glm::quat& rotation, glm::vec3& scale)
+	Object& Scene::AddObject(const std::string& name, unsigned int meshID, glm::vec3 const & position, glm::vec3 const & dimension, glm::quat const & rotation, glm::vec3 const & scale)
 	{
 		Object object;
 		object.transform.position = position;
