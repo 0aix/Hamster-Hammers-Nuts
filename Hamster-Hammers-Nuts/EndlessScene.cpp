@@ -350,8 +350,8 @@ namespace Hamster
 			}
 			for (auto nut : nuts)
 			{
-				if (abs(abs(nut->transform.position.z + elapsed * nut->velocity.z - z1) - hamster.height - nut->height) < 0.25f &&
-					nut->transform.position.z > nut->height && nut->velocity.z < 0.0f)
+				if (abs(nut->transform.position.z + elapsed * nut->velocity.z - z1) <= hamster.height + nut->height &&
+					nut->transform.position.z >= nut->height * 4.0f && nut->velocity.z < 0.0f)
 				{
 					if (abs(nut->transform.position.x - hamster.transform.position.x) < hamster.length + nut->length &&
 						abs(nut->transform.position.y - hamster.transform.position.y) < hamster.width + nut->width)
