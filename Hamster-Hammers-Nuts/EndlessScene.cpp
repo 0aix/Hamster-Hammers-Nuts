@@ -176,12 +176,6 @@ namespace Hamster
 		if (elapsed > 1.0f / 60.0f)
 			elapsed = 1.0f / 60.0f;
 
-		if (Game::KEYBD_STATE[SDL_SCANCODE_ESCAPE])
-		{
-			Game::NextScene(0);
-			return false;
-		}
-
 		if (paused > 0)
 			return true;
 

@@ -614,7 +614,7 @@ namespace Hamster
 			hawk.velocity.y = 0.0f;
 			state = State::OnLadder2;
 			level += 1;
-			max_score = level * 5;
+			max_score = (level - 1) / 3 + 3;
 			next_drop = 5.0f;
 			speed = 7.5f;
 			windxv = 0.0f;
@@ -657,7 +657,7 @@ namespace Hamster
 			hawk.velocity.y = 0.0f;
 			hamster.transform.position.z = 50.0f;
 			level = std::max(level-1,1);
-			max_score = level * 5;
+			max_score = (level - 1) / 3 + 3;
 			next_drop = 2.0f;
 			speed = 7.5f;
 			windxv = 0.0f;
